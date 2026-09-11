@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-11T13:09:40.533087+00:00",
+  "generatedAt": "2026-09-11T13:21:31.450065+00:00",
   "keyless": true,
   "providers": [
     {
@@ -22,19 +22,287 @@
       "currency": "USD",
       "exchange": "NMS",
       "price": 326.57,
-      "previousClose": 260.83,
-      "change": 25.2,
+      "previousClose": 315.34,
+      "change": 3.56,
       "mom5": 0.5,
       "volRatio": 1.72,
       "rsi": 64.7,
       "sma20": 3.58,
       "volatility": 1.44,
       "high90": -3.97,
+      "history30": [
+        {
+          "date": "2026-07-30",
+          "close": 333.43
+        },
+        {
+          "date": "2026-07-31",
+          "close": 308.91
+        },
+        {
+          "date": "2026-08-03",
+          "close": 303.42
+        },
+        {
+          "date": "2026-08-04",
+          "close": 309.38
+        },
+        {
+          "date": "2026-08-05",
+          "close": 311.0
+        },
+        {
+          "date": "2026-08-06",
+          "close": 312.41
+        },
+        {
+          "date": "2026-08-07",
+          "close": 313.33
+        },
+        {
+          "date": "2026-08-10",
+          "close": 308.26
+        },
+        {
+          "date": "2026-08-11",
+          "close": 304.91
+        },
+        {
+          "date": "2026-08-12",
+          "close": 302.25
+        },
+        {
+          "date": "2026-08-13",
+          "close": 305.26
+        },
+        {
+          "date": "2026-08-14",
+          "close": 305.93
+        },
+        {
+          "date": "2026-08-17",
+          "close": 305.59
+        },
+        {
+          "date": "2026-08-18",
+          "close": 310.03
+        },
+        {
+          "date": "2026-08-19",
+          "close": 316.83
+        },
+        {
+          "date": "2026-08-20",
+          "close": 311.3
+        },
+        {
+          "date": "2026-08-21",
+          "close": 309.35
+        },
+        {
+          "date": "2026-08-24",
+          "close": 310.34
+        },
+        {
+          "date": "2026-08-25",
+          "close": 309.9
+        },
+        {
+          "date": "2026-08-26",
+          "close": 313.45
+        },
+        {
+          "date": "2026-08-27",
+          "close": 314.58
+        },
+        {
+          "date": "2026-08-28",
+          "close": 319.7
+        },
+        {
+          "date": "2026-08-31",
+          "close": 316.85
+        },
+        {
+          "date": "2026-09-01",
+          "close": 325.13
+        },
+        {
+          "date": "2026-09-02",
+          "close": 324.96
+        },
+        {
+          "date": "2026-09-03",
+          "close": 328.21
+        },
+        {
+          "date": "2026-09-04",
+          "close": 319.97
+        },
+        {
+          "date": "2026-09-08",
+          "close": 316.22
+        },
+        {
+          "date": "2026-09-09",
+          "close": 315.34
+        },
+        {
+          "date": "2026-09-10",
+          "close": 326.57
+        }
+      ],
       "timestamp": "2026-09-10T13:30:00+00:00",
       "source": "Yahoo Finance chart data",
       "sourceUrl": "https://finance.yahoo.com/quote/AAPL",
       "market": "US",
-      "score": 73.0,
+      "score": 65.7,
+      "official": {
+        "source": "SEC EDGAR unavailable this run",
+        "sourceUrl": "https://www.sec.gov/edgar/browse/?CIK=320193&owner=exclude"
+      }
+    },
+    {
+      "ticker": "LLOY.L",
+      "name": "Lloyds Banking Group plc",
+      "currency": "GBp",
+      "exchange": "LSE",
+      "price": 111.353,
+      "previousClose": 109.1,
+      "change": 2.07,
+      "mom5": -1.11,
+      "volRatio": 0.3,
+      "rsi": 50.4,
+      "sma20": -0.11,
+      "volatility": 1.2,
+      "high90": -4.91,
+      "history30": [
+        {
+          "date": "2026-07-31",
+          "close": 114.7
+        },
+        {
+          "date": "2026-08-03",
+          "close": 116.6
+        },
+        {
+          "date": "2026-08-04",
+          "close": 117.05
+        },
+        {
+          "date": "2026-08-05",
+          "close": 117.1
+        },
+        {
+          "date": "2026-08-06",
+          "close": 114.7
+        },
+        {
+          "date": "2026-08-07",
+          "close": 115.15
+        },
+        {
+          "date": "2026-08-10",
+          "close": 114.65
+        },
+        {
+          "date": "2026-08-11",
+          "close": 113.8
+        },
+        {
+          "date": "2026-08-12",
+          "close": 115.2
+        },
+        {
+          "date": "2026-08-13",
+          "close": 115.3
+        },
+        {
+          "date": "2026-08-14",
+          "close": 115.2
+        },
+        {
+          "date": "2026-08-17",
+          "close": 114.7
+        },
+        {
+          "date": "2026-08-18",
+          "close": 112.75
+        },
+        {
+          "date": "2026-08-19",
+          "close": 110.35
+        },
+        {
+          "date": "2026-08-20",
+          "close": 109.75
+        },
+        {
+          "date": "2026-08-21",
+          "close": 111.25
+        },
+        {
+          "date": "2026-08-24",
+          "close": 111.6
+        },
+        {
+          "date": "2026-08-25",
+          "close": 111.45
+        },
+        {
+          "date": "2026-08-26",
+          "close": 111.7
+        },
+        {
+          "date": "2026-08-27",
+          "close": 109.3
+        },
+        {
+          "date": "2026-08-28",
+          "close": 109.95
+        },
+        {
+          "date": "2026-09-01",
+          "close": 110.55
+        },
+        {
+          "date": "2026-09-02",
+          "close": 110.45
+        },
+        {
+          "date": "2026-09-03",
+          "close": 112.45
+        },
+        {
+          "date": "2026-09-04",
+          "close": 112.6
+        },
+        {
+          "date": "2026-09-07",
+          "close": 113.35
+        },
+        {
+          "date": "2026-09-08",
+          "close": 112.1
+        },
+        {
+          "date": "2026-09-09",
+          "close": 109.65
+        },
+        {
+          "date": "2026-09-10",
+          "close": 109.1
+        },
+        {
+          "date": "2026-09-11",
+          "close": 111.353
+        }
+      ],
+      "timestamp": "2026-09-11T07:00:00+00:00",
+      "source": "Yahoo Finance chart data",
+      "sourceUrl": "https://finance.yahoo.com/quote/LLOY.L",
+      "market": "UK",
+      "score": 44.6,
       "official": {
         "source": "UK official sources",
         "lseUrl": "https://www.londonstockexchange.com/",
@@ -42,24 +310,146 @@
       }
     },
     {
-      "ticker": "SHEL.L",
-      "name": "Shell plc",
+      "ticker": "RR.L",
+      "name": "Rolls-Royce Holdings plc",
       "currency": "GBp",
       "exchange": "LSE",
-      "price": 3542.0,
-      "previousClose": 3244.0,
-      "change": 9.19,
-      "mom5": 3.05,
-      "volRatio": 0.29,
-      "rsi": 68.8,
-      "sma20": 3.53,
-      "volatility": 0.95,
-      "high90": 0.0,
+      "price": 1459.4,
+      "previousClose": 1430.0,
+      "change": 2.06,
+      "mom5": -2.01,
+      "volRatio": 0.14,
+      "rsi": 41.5,
+      "sma20": -2.71,
+      "volatility": 1.55,
+      "high90": -7.07,
+      "history30": [
+        {
+          "date": "2026-07-31",
+          "close": 1467.8
+        },
+        {
+          "date": "2026-08-03",
+          "close": 1506.8
+        },
+        {
+          "date": "2026-08-04",
+          "close": 1529.4
+        },
+        {
+          "date": "2026-08-05",
+          "close": 1570.4
+        },
+        {
+          "date": "2026-08-06",
+          "close": 1533.4
+        },
+        {
+          "date": "2026-08-07",
+          "close": 1530.0
+        },
+        {
+          "date": "2026-08-10",
+          "close": 1540.0
+        },
+        {
+          "date": "2026-08-11",
+          "close": 1533.0
+        },
+        {
+          "date": "2026-08-12",
+          "close": 1546.0
+        },
+        {
+          "date": "2026-08-13",
+          "close": 1525.0
+        },
+        {
+          "date": "2026-08-14",
+          "close": 1541.0
+        },
+        {
+          "date": "2026-08-17",
+          "close": 1563.8
+        },
+        {
+          "date": "2026-08-18",
+          "close": 1537.8
+        },
+        {
+          "date": "2026-08-19",
+          "close": 1519.4
+        },
+        {
+          "date": "2026-08-20",
+          "close": 1499.4
+        },
+        {
+          "date": "2026-08-21",
+          "close": 1502.2
+        },
+        {
+          "date": "2026-08-24",
+          "close": 1500.2
+        },
+        {
+          "date": "2026-08-25",
+          "close": 1530.0
+        },
+        {
+          "date": "2026-08-26",
+          "close": 1543.0
+        },
+        {
+          "date": "2026-08-27",
+          "close": 1529.8
+        },
+        {
+          "date": "2026-08-28",
+          "close": 1530.2
+        },
+        {
+          "date": "2026-09-01",
+          "close": 1459.2
+        },
+        {
+          "date": "2026-09-02",
+          "close": 1469.0
+        },
+        {
+          "date": "2026-09-03",
+          "close": 1480.2
+        },
+        {
+          "date": "2026-09-04",
+          "close": 1489.4
+        },
+        {
+          "date": "2026-09-07",
+          "close": 1490.8
+        },
+        {
+          "date": "2026-09-08",
+          "close": 1481.0
+        },
+        {
+          "date": "2026-09-09",
+          "close": 1445.8
+        },
+        {
+          "date": "2026-09-10",
+          "close": 1430.0
+        },
+        {
+          "date": "2026-09-11",
+          "close": 1459.4
+        }
+      ],
       "timestamp": "2026-09-11T07:00:00+00:00",
       "source": "Yahoo Finance chart data",
-      "sourceUrl": "https://finance.yahoo.com/quote/SHEL.L",
+      "sourceUrl": "https://finance.yahoo.com/quote/RR.L",
       "market": "UK",
-      "score": 65.1,
+      "score": 41.2,
       "official": {
         "source": "UK official sources",
         "lseUrl": "https://www.londonstockexchange.com/",
@@ -67,24 +457,293 @@
       }
     },
     {
-      "ticker": "VOD.L",
-      "name": "Vodafone Group Public Limited Company",
+      "ticker": "BARC.L",
+      "name": "Barclays PLC",
       "currency": "GBp",
       "exchange": "LSE",
-      "price": 129.0,
-      "previousClose": 107.6,
-      "change": 19.89,
-      "mom5": 2.71,
-      "volRatio": 0.13,
-      "rsi": 84.1,
-      "sma20": 6.19,
-      "volatility": 1.18,
-      "high90": 0.0,
+      "price": 494.3,
+      "previousClose": 484.35,
+      "change": 2.05,
+      "mom5": -0.47,
+      "volRatio": 0.21,
+      "rsi": 51.2,
+      "sma20": -0.36,
+      "volatility": 1.27,
+      "high90": -6.81,
+      "history30": [
+        {
+          "date": "2026-07-31",
+          "close": 508.7
+        },
+        {
+          "date": "2026-08-03",
+          "close": 515.0
+        },
+        {
+          "date": "2026-08-04",
+          "close": 522.3
+        },
+        {
+          "date": "2026-08-05",
+          "close": 527.5
+        },
+        {
+          "date": "2026-08-06",
+          "close": 520.0
+        },
+        {
+          "date": "2026-08-07",
+          "close": 516.0
+        },
+        {
+          "date": "2026-08-10",
+          "close": 518.0
+        },
+        {
+          "date": "2026-08-11",
+          "close": 516.0
+        },
+        {
+          "date": "2026-08-12",
+          "close": 519.4
+        },
+        {
+          "date": "2026-08-13",
+          "close": 519.0
+        },
+        {
+          "date": "2026-08-14",
+          "close": 520.5
+        },
+        {
+          "date": "2026-08-17",
+          "close": 515.4
+        },
+        {
+          "date": "2026-08-18",
+          "close": 503.6
+        },
+        {
+          "date": "2026-08-19",
+          "close": 496.1
+        },
+        {
+          "date": "2026-08-20",
+          "close": 489.0
+        },
+        {
+          "date": "2026-08-21",
+          "close": 492.6
+        },
+        {
+          "date": "2026-08-24",
+          "close": 495.35
+        },
+        {
+          "date": "2026-08-25",
+          "close": 496.25
+        },
+        {
+          "date": "2026-08-26",
+          "close": 499.55
+        },
+        {
+          "date": "2026-08-27",
+          "close": 492.6
+        },
+        {
+          "date": "2026-08-28",
+          "close": 496.65
+        },
+        {
+          "date": "2026-09-01",
+          "close": 486.1
+        },
+        {
+          "date": "2026-09-02",
+          "close": 483.45
+        },
+        {
+          "date": "2026-09-03",
+          "close": 493.4
+        },
+        {
+          "date": "2026-09-04",
+          "close": 496.65
+        },
+        {
+          "date": "2026-09-07",
+          "close": 499.65
+        },
+        {
+          "date": "2026-09-08",
+          "close": 498.05
+        },
+        {
+          "date": "2026-09-09",
+          "close": 487.85
+        },
+        {
+          "date": "2026-09-10",
+          "close": 484.35
+        },
+        {
+          "date": "2026-09-11",
+          "close": 494.3
+        }
+      ],
       "timestamp": "2026-09-11T07:00:00+00:00",
       "source": "Yahoo Finance chart data",
-      "sourceUrl": "https://finance.yahoo.com/quote/VOD.L",
+      "sourceUrl": "https://finance.yahoo.com/quote/BARC.L",
       "market": "UK",
-      "score": 61.7,
+      "score": 45.2,
+      "official": {
+        "source": "UK official sources",
+        "lseUrl": "https://www.londonstockexchange.com/",
+        "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"
+      }
+    },
+    {
+      "ticker": "IAG.L",
+      "name": "International Consolidated Airlines Group S.A.",
+      "currency": "GBp",
+      "exchange": "LSE",
+      "price": 418.1,
+      "previousClose": 412.3,
+      "change": 1.41,
+      "mom5": -3.04,
+      "volRatio": 0.31,
+      "rsi": 47.0,
+      "sma20": -2.37,
+      "volatility": 1.61,
+      "high90": -14.32,
+      "history30": [
+        {
+          "date": "2026-07-31",
+          "close": 431.9
+        },
+        {
+          "date": "2026-08-03",
+          "close": 433.5
+        },
+        {
+          "date": "2026-08-04",
+          "close": 438.6
+        },
+        {
+          "date": "2026-08-05",
+          "close": 444.5
+        },
+        {
+          "date": "2026-08-06",
+          "close": 446.0
+        },
+        {
+          "date": "2026-08-07",
+          "close": 442.4
+        },
+        {
+          "date": "2026-08-10",
+          "close": 436.3
+        },
+        {
+          "date": "2026-08-11",
+          "close": 440.0
+        },
+        {
+          "date": "2026-08-12",
+          "close": 442.0
+        },
+        {
+          "date": "2026-08-13",
+          "close": 442.5
+        },
+        {
+          "date": "2026-08-14",
+          "close": 443.5
+        },
+        {
+          "date": "2026-08-17",
+          "close": 436.5
+        },
+        {
+          "date": "2026-08-18",
+          "close": 425.1
+        },
+        {
+          "date": "2026-08-19",
+          "close": 427.6
+        },
+        {
+          "date": "2026-08-20",
+          "close": 418.7
+        },
+        {
+          "date": "2026-08-21",
+          "close": 422.9
+        },
+        {
+          "date": "2026-08-24",
+          "close": 432.2
+        },
+        {
+          "date": "2026-08-25",
+          "close": 441.9
+        },
+        {
+          "date": "2026-08-26",
+          "close": 442.2
+        },
+        {
+          "date": "2026-08-27",
+          "close": 436.9
+        },
+        {
+          "date": "2026-08-28",
+          "close": 438.2
+        },
+        {
+          "date": "2026-09-01",
+          "close": 422.4
+        },
+        {
+          "date": "2026-09-02",
+          "close": 419.4
+        },
+        {
+          "date": "2026-09-03",
+          "close": 426.7
+        },
+        {
+          "date": "2026-09-04",
+          "close": 431.2
+        },
+        {
+          "date": "2026-09-07",
+          "close": 428.4
+        },
+        {
+          "date": "2026-09-08",
+          "close": 425.3
+        },
+        {
+          "date": "2026-09-09",
+          "close": 415.1
+        },
+        {
+          "date": "2026-09-10",
+          "close": 412.3
+        },
+        {
+          "date": "2026-09-11",
+          "close": 418.1
+        }
+      ],
+      "timestamp": "2026-09-11T07:00:00+00:00",
+      "source": "Yahoo Finance chart data",
+      "sourceUrl": "https://finance.yahoo.com/quote/IAG.L",
+      "market": "UK",
+      "score": 38.1,
       "official": {
         "source": "UK official sources",
         "lseUrl": "https://www.londonstockexchange.com/",
@@ -97,19 +756,287 @@
       "currency": "USD",
       "exchange": "NMS",
       "price": 332.6,
-      "previousClose": 307.04,
-      "change": 8.32,
+      "previousClose": 330.65,
+      "change": 0.59,
       "mom5": -1.34,
       "volRatio": 1.04,
       "rsi": 42.5,
       "sma20": -2.59,
       "volatility": 1.13,
       "high90": -17.39,
+      "history30": [
+        {
+          "date": "2026-07-30",
+          "close": 333.66
+        },
+        {
+          "date": "2026-07-31",
+          "close": 356.13
+        },
+        {
+          "date": "2026-08-03",
+          "close": 373.51
+        },
+        {
+          "date": "2026-08-04",
+          "close": 377.65
+        },
+        {
+          "date": "2026-08-05",
+          "close": 362.43
+        },
+        {
+          "date": "2026-08-06",
+          "close": 357.75
+        },
+        {
+          "date": "2026-08-07",
+          "close": 354.3
+        },
+        {
+          "date": "2026-08-10",
+          "close": 357.52
+        },
+        {
+          "date": "2026-08-11",
+          "close": 343.8
+        },
+        {
+          "date": "2026-08-12",
+          "close": 343.54
+        },
+        {
+          "date": "2026-08-13",
+          "close": 346.36
+        },
+        {
+          "date": "2026-08-14",
+          "close": 345.9
+        },
+        {
+          "date": "2026-08-17",
+          "close": 344.0
+        },
+        {
+          "date": "2026-08-18",
+          "close": 344.2
+        },
+        {
+          "date": "2026-08-19",
+          "close": 344.72
+        },
+        {
+          "date": "2026-08-20",
+          "close": 340.67
+        },
+        {
+          "date": "2026-08-21",
+          "close": 344.82
+        },
+        {
+          "date": "2026-08-24",
+          "close": 348.06
+        },
+        {
+          "date": "2026-08-25",
+          "close": 346.96
+        },
+        {
+          "date": "2026-08-26",
+          "close": 342.0
+        },
+        {
+          "date": "2026-08-27",
+          "close": 340.65
+        },
+        {
+          "date": "2026-08-28",
+          "close": 346.59
+        },
+        {
+          "date": "2026-08-31",
+          "close": 339.35
+        },
+        {
+          "date": "2026-09-01",
+          "close": 335.02
+        },
+        {
+          "date": "2026-09-02",
+          "close": 337.12
+        },
+        {
+          "date": "2026-09-03",
+          "close": 342.48
+        },
+        {
+          "date": "2026-09-04",
+          "close": 338.46
+        },
+        {
+          "date": "2026-09-08",
+          "close": 338.36
+        },
+        {
+          "date": "2026-09-09",
+          "close": 330.65
+        },
+        {
+          "date": "2026-09-10",
+          "close": 332.6
+        }
+      ],
       "timestamp": "2026-09-10T13:30:00+00:00",
       "source": "Yahoo Finance chart data",
       "sourceUrl": "https://finance.yahoo.com/quote/GOOGL",
       "market": "US",
-      "score": 59.4,
+      "score": 43.2,
+      "official": {
+        "source": "SEC EDGAR unavailable this run",
+        "sourceUrl": "https://www.sec.gov/edgar/browse/?CIK=1652044&owner=exclude"
+      }
+    },
+    {
+      "ticker": "VOD.L",
+      "name": "Vodafone Group Public Limited Company",
+      "currency": "GBp",
+      "exchange": "LSE",
+      "price": 129.25,
+      "previousClose": 128.65,
+      "change": 0.47,
+      "mom5": 2.91,
+      "volRatio": 0.14,
+      "rsi": 84.4,
+      "sma20": 6.38,
+      "volatility": 1.18,
+      "high90": 0.0,
+      "history30": [
+        {
+          "date": "2026-07-31",
+          "close": 117.85
+        },
+        {
+          "date": "2026-08-03",
+          "close": 117.25
+        },
+        {
+          "date": "2026-08-04",
+          "close": 116.9
+        },
+        {
+          "date": "2026-08-05",
+          "close": 114.4
+        },
+        {
+          "date": "2026-08-06",
+          "close": 119.3
+        },
+        {
+          "date": "2026-08-07",
+          "close": 120.5
+        },
+        {
+          "date": "2026-08-10",
+          "close": 116.8
+        },
+        {
+          "date": "2026-08-11",
+          "close": 118.3
+        },
+        {
+          "date": "2026-08-12",
+          "close": 119.35
+        },
+        {
+          "date": "2026-08-13",
+          "close": 120.15
+        },
+        {
+          "date": "2026-08-14",
+          "close": 121.55
+        },
+        {
+          "date": "2026-08-17",
+          "close": 119.65
+        },
+        {
+          "date": "2026-08-18",
+          "close": 119.75
+        },
+        {
+          "date": "2026-08-19",
+          "close": 119.4
+        },
+        {
+          "date": "2026-08-20",
+          "close": 118.0
+        },
+        {
+          "date": "2026-08-21",
+          "close": 117.15
+        },
+        {
+          "date": "2026-08-24",
+          "close": 117.65
+        },
+        {
+          "date": "2026-08-25",
+          "close": 118.25
+        },
+        {
+          "date": "2026-08-26",
+          "close": 117.9
+        },
+        {
+          "date": "2026-08-27",
+          "close": 117.1
+        },
+        {
+          "date": "2026-08-28",
+          "close": 118.45
+        },
+        {
+          "date": "2026-09-01",
+          "close": 119.4
+        },
+        {
+          "date": "2026-09-02",
+          "close": 119.4
+        },
+        {
+          "date": "2026-09-03",
+          "close": 122.3
+        },
+        {
+          "date": "2026-09-04",
+          "close": 125.6
+        },
+        {
+          "date": "2026-09-07",
+          "close": 125.45
+        },
+        {
+          "date": "2026-09-08",
+          "close": 128.25
+        },
+        {
+          "date": "2026-09-09",
+          "close": 126.8
+        },
+        {
+          "date": "2026-09-10",
+          "close": 128.65
+        },
+        {
+          "date": "2026-09-11",
+          "close": 129.25
+        }
+      ],
+      "timestamp": "2026-09-11T07:00:00+00:00",
+      "source": "Yahoo Finance chart data",
+      "sourceUrl": "https://finance.yahoo.com/quote/VOD.L",
+      "market": "UK",
+      "score": 45.6,
       "official": {
         "source": "UK official sources",
         "lseUrl": "https://www.londonstockexchange.com/",
@@ -122,44 +1049,287 @@
       "currency": "USD",
       "exchange": "NMS",
       "price": 492.44,
-      "previousClose": 405.76,
-      "change": 21.36,
+      "previousClose": 491.65,
+      "change": 0.16,
       "mom5": -0.88,
       "volRatio": 0.73,
       "rsi": 56.9,
       "sma20": -0.42,
       "volatility": 1.34,
       "high90": -4.11,
+      "history30": [
+        {
+          "date": "2026-07-30",
+          "close": 451.1
+        },
+        {
+          "date": "2026-07-31",
+          "close": 464.72
+        },
+        {
+          "date": "2026-08-03",
+          "close": 487.65
+        },
+        {
+          "date": "2026-08-04",
+          "close": 492.81
+        },
+        {
+          "date": "2026-08-05",
+          "close": 487.46
+        },
+        {
+          "date": "2026-08-06",
+          "close": 499.86
+        },
+        {
+          "date": "2026-08-07",
+          "close": 499.99
+        },
+        {
+          "date": "2026-08-10",
+          "close": 506.06
+        },
+        {
+          "date": "2026-08-11",
+          "close": 503.81
+        },
+        {
+          "date": "2026-08-12",
+          "close": 492.43
+        },
+        {
+          "date": "2026-08-13",
+          "close": 496.88
+        },
+        {
+          "date": "2026-08-14",
+          "close": 495.4
+        },
+        {
+          "date": "2026-08-17",
+          "close": 480.35
+        },
+        {
+          "date": "2026-08-18",
+          "close": 481.63
+        },
+        {
+          "date": "2026-08-19",
+          "close": 484.31
+        },
+        {
+          "date": "2026-08-20",
+          "close": 481.15
+        },
+        {
+          "date": "2026-08-21",
+          "close": 483.24
+        },
+        {
+          "date": "2026-08-24",
+          "close": 487.31
+        },
+        {
+          "date": "2026-08-25",
+          "close": 491.71
+        },
+        {
+          "date": "2026-08-26",
+          "close": 496.37
+        },
+        {
+          "date": "2026-08-27",
+          "close": 505.06
+        },
+        {
+          "date": "2026-08-28",
+          "close": 513.53
+        },
+        {
+          "date": "2026-08-31",
+          "close": 507.29
+        },
+        {
+          "date": "2026-09-01",
+          "close": 501.02
+        },
+        {
+          "date": "2026-09-02",
+          "close": 496.82
+        },
+        {
+          "date": "2026-09-03",
+          "close": 510.12
+        },
+        {
+          "date": "2026-09-04",
+          "close": 499.7
+        },
+        {
+          "date": "2026-09-08",
+          "close": 493.95
+        },
+        {
+          "date": "2026-09-09",
+          "close": 491.65
+        },
+        {
+          "date": "2026-09-10",
+          "close": 492.44
+        }
+      ],
       "timestamp": "2026-09-10T13:30:00+00:00",
       "source": "Yahoo Finance chart data",
       "sourceUrl": "https://finance.yahoo.com/quote/MSFT",
       "market": "US",
-      "score": 59.0,
+      "score": 41.5,
       "official": {
-        "source": "UK official sources",
-        "lseUrl": "https://www.londonstockexchange.com/",
-        "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"
+        "source": "SEC EDGAR unavailable this run",
+        "sourceUrl": "https://www.sec.gov/edgar/browse/?CIK=789019&owner=exclude"
       }
     },
     {
-      "ticker": "META",
-      "name": "Meta Platforms, Inc.",
-      "currency": "USD",
-      "exchange": "NMS",
-      "price": 644.38,
-      "previousClose": 654.07,
-      "change": -1.48,
-      "mom5": 8.69,
-      "volRatio": 1.24,
-      "rsi": 83.9,
-      "sma20": 10.37,
-      "volatility": 2.33,
-      "high90": -5.42,
-      "timestamp": "2026-09-10T13:30:00+00:00",
+      "ticker": "SHEL.L",
+      "name": "Shell plc",
+      "currency": "GBp",
+      "exchange": "LSE",
+      "price": 3538.5,
+      "previousClose": 3533.0,
+      "change": 0.16,
+      "mom5": 2.95,
+      "volRatio": 0.31,
+      "rsi": 68.5,
+      "sma20": 3.43,
+      "volatility": 0.95,
+      "high90": 0.0,
+      "history30": [
+        {
+          "date": "2026-07-31",
+          "close": 3383.5
+        },
+        {
+          "date": "2026-08-03",
+          "close": 3405.5
+        },
+        {
+          "date": "2026-08-04",
+          "close": 3321.5
+        },
+        {
+          "date": "2026-08-05",
+          "close": 3280.5
+        },
+        {
+          "date": "2026-08-06",
+          "close": 3315.0
+        },
+        {
+          "date": "2026-08-07",
+          "close": 3277.5
+        },
+        {
+          "date": "2026-08-10",
+          "close": 3298.0
+        },
+        {
+          "date": "2026-08-11",
+          "close": 3356.0
+        },
+        {
+          "date": "2026-08-12",
+          "close": 3322.5
+        },
+        {
+          "date": "2026-08-13",
+          "close": 3288.0
+        },
+        {
+          "date": "2026-08-14",
+          "close": 3320.0
+        },
+        {
+          "date": "2026-08-17",
+          "close": 3329.5
+        },
+        {
+          "date": "2026-08-18",
+          "close": 3388.0
+        },
+        {
+          "date": "2026-08-19",
+          "close": 3420.5
+        },
+        {
+          "date": "2026-08-20",
+          "close": 3440.0
+        },
+        {
+          "date": "2026-08-21",
+          "close": 3409.5
+        },
+        {
+          "date": "2026-08-24",
+          "close": 3397.0
+        },
+        {
+          "date": "2026-08-25",
+          "close": 3386.5
+        },
+        {
+          "date": "2026-08-26",
+          "close": 3371.0
+        },
+        {
+          "date": "2026-08-27",
+          "close": 3311.0
+        },
+        {
+          "date": "2026-08-28",
+          "close": 3344.5
+        },
+        {
+          "date": "2026-09-01",
+          "close": 3432.5
+        },
+        {
+          "date": "2026-09-02",
+          "close": 3443.0
+        },
+        {
+          "date": "2026-09-03",
+          "close": 3431.5
+        },
+        {
+          "date": "2026-09-04",
+          "close": 3437.0
+        },
+        {
+          "date": "2026-09-07",
+          "close": 3482.5
+        },
+        {
+          "date": "2026-09-08",
+          "close": 3500.5
+        },
+        {
+          "date": "2026-09-09",
+          "close": 3504.0
+        },
+        {
+          "date": "2026-09-10",
+          "close": 3533.0
+        },
+        {
+          "date": "2026-09-11",
+          "close": 3538.5
+        }
+      ],
+      "timestamp": "2026-09-11T07:00:00+00:00",
       "source": "Yahoo Finance chart data",
-      "sourceUrl": "https://finance.yahoo.com/quote/META",
-      "market": "US",
-      "score": 57.9,
+      "sourceUrl": "https://finance.yahoo.com/quote/SHEL.L",
+      "market": "UK",
+      "score": 47.4,
       "official": {
         "source": "UK official sources",
         "lseUrl": "https://www.londonstockexchange.com/",
@@ -172,173 +1342,144 @@
       "currency": "USD",
       "exchange": "NMS",
       "price": 251.89,
-      "previousClose": 214.33,
-      "change": 17.52,
+      "previousClose": 252.4,
+      "change": -0.2,
       "mom5": -1.21,
       "volRatio": 0.78,
       "rsi": 40.5,
       "sma20": -2.89,
       "volatility": 1.54,
       "high90": -11.31,
+      "history30": [
+        {
+          "date": "2026-07-30",
+          "close": 235.5
+        },
+        {
+          "date": "2026-07-31",
+          "close": 271.58
+        },
+        {
+          "date": "2026-08-03",
+          "close": 284.02
+        },
+        {
+          "date": "2026-08-04",
+          "close": 277.42
+        },
+        {
+          "date": "2026-08-05",
+          "close": 272.65
+        },
+        {
+          "date": "2026-08-06",
+          "close": 272.26
+        },
+        {
+          "date": "2026-08-07",
+          "close": 274.48
+        },
+        {
+          "date": "2026-08-10",
+          "close": 278.09
+        },
+        {
+          "date": "2026-08-11",
+          "close": 272.27
+        },
+        {
+          "date": "2026-08-12",
+          "close": 267.28
+        },
+        {
+          "date": "2026-08-13",
+          "close": 265.13
+        },
+        {
+          "date": "2026-08-14",
+          "close": 262.65
+        },
+        {
+          "date": "2026-08-17",
+          "close": 261.31
+        },
+        {
+          "date": "2026-08-18",
+          "close": 259.45
+        },
+        {
+          "date": "2026-08-19",
+          "close": 265.84
+        },
+        {
+          "date": "2026-08-20",
+          "close": 260.11
+        },
+        {
+          "date": "2026-08-21",
+          "close": 258.63
+        },
+        {
+          "date": "2026-08-24",
+          "close": 262.07
+        },
+        {
+          "date": "2026-08-25",
+          "close": 261.06
+        },
+        {
+          "date": "2026-08-26",
+          "close": 260.28
+        },
+        {
+          "date": "2026-08-27",
+          "close": 256.26
+        },
+        {
+          "date": "2026-08-28",
+          "close": 266.43
+        },
+        {
+          "date": "2026-08-31",
+          "close": 259.77
+        },
+        {
+          "date": "2026-09-01",
+          "close": 254.92
+        },
+        {
+          "date": "2026-09-02",
+          "close": 254.98
+        },
+        {
+          "date": "2026-09-03",
+          "close": 258.9
+        },
+        {
+          "date": "2026-09-04",
+          "close": 258.51
+        },
+        {
+          "date": "2026-09-08",
+          "close": 256.97
+        },
+        {
+          "date": "2026-09-09",
+          "close": 252.4
+        },
+        {
+          "date": "2026-09-10",
+          "close": 251.89
+        }
+      ],
       "timestamp": "2026-09-10T13:30:00+00:00",
       "source": "Yahoo Finance chart data",
       "sourceUrl": "https://finance.yahoo.com/quote/AMZN",
       "market": "US",
-      "score": 57.0,
+      "score": 38.4,
       "official": {
-        "source": "UK official sources",
-        "lseUrl": "https://www.londonstockexchange.com/",
-        "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"
-      }
-    },
-    {
-      "ticker": "NVDA",
-      "name": "NVIDIA Corporation",
-      "currency": "USD",
-      "exchange": "NMS",
-      "price": 218.36,
-      "previousClose": 184.77,
-      "change": 18.18,
-      "mom5": -2.7,
-      "volRatio": 0.82,
-      "rsi": 51.0,
-      "sma20": -0.98,
-      "volatility": 2.74,
-      "high90": -7.37,
-      "timestamp": "2026-09-10T13:30:00+00:00",
-      "source": "Yahoo Finance chart data",
-      "sourceUrl": "https://finance.yahoo.com/quote/NVDA",
-      "market": "US",
-      "score": 56.8,
-      "official": {
-        "source": "UK official sources",
-        "lseUrl": "https://www.londonstockexchange.com/",
-        "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"
-      }
-    },
-    {
-      "ticker": "BARC.L",
-      "name": "Barclays PLC",
-      "currency": "GBp",
-      "exchange": "LSE",
-      "price": 493.8,
-      "previousClose": 410.25,
-      "change": 20.37,
-      "mom5": -0.57,
-      "volRatio": 0.2,
-      "rsi": 50.8,
-      "sma20": -0.45,
-      "volatility": 1.26,
-      "high90": -6.9,
-      "timestamp": "2026-09-11T07:00:00+00:00",
-      "source": "Yahoo Finance chart data",
-      "sourceUrl": "https://finance.yahoo.com/quote/BARC.L",
-      "market": "UK",
-      "score": 56.8,
-      "official": {
-        "source": "UK official sources",
-        "lseUrl": "https://www.londonstockexchange.com/",
-        "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"
-      }
-    },
-    {
-      "ticker": "LLOY.L",
-      "name": "Lloyds Banking Group plc",
-      "currency": "GBp",
-      "exchange": "LSE",
-      "price": 111.2,
-      "previousClose": 98.38,
-      "change": 13.03,
-      "mom5": -1.24,
-      "volRatio": 0.3,
-      "rsi": 49.8,
-      "sma20": -0.24,
-      "volatility": 1.19,
-      "high90": -5.04,
-      "timestamp": "2026-09-11T07:00:00+00:00",
-      "source": "Yahoo Finance chart data",
-      "sourceUrl": "https://finance.yahoo.com/quote/LLOY.L",
-      "market": "UK",
-      "score": 56.1,
-      "official": {
-        "source": "UK official sources",
-        "lseUrl": "https://www.londonstockexchange.com/",
-        "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"
-      }
-    },
-    {
-      "ticker": "RR.L",
-      "name": "Rolls-Royce Holdings plc",
-      "currency": "GBp",
-      "exchange": "LSE",
-      "price": 1458.0,
-      "previousClose": 1300.5,
-      "change": 12.11,
-      "mom5": -2.11,
-      "volRatio": 0.13,
-      "rsi": 41.2,
-      "sma20": -2.8,
-      "volatility": 1.55,
-      "high90": -7.16,
-      "timestamp": "2026-09-11T07:00:00+00:00",
-      "source": "Yahoo Finance chart data",
-      "sourceUrl": "https://finance.yahoo.com/quote/RR.L",
-      "market": "UK",
-      "score": 52.8,
-      "official": {
-        "source": "UK official sources",
-        "lseUrl": "https://www.londonstockexchange.com/",
-        "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"
-      }
-    },
-    {
-      "ticker": "PLTR",
-      "name": "Palantir Technologies Inc.",
-      "currency": "USD",
-      "exchange": "NMS",
-      "price": 165.86,
-      "previousClose": 151.14,
-      "change": 9.74,
-      "mom5": -2.12,
-      "volRatio": 0.7,
-      "rsi": 44.5,
-      "sma20": -5.84,
-      "volatility": 3.33,
-      "high90": -11.01,
-      "timestamp": "2026-09-10T13:30:00+00:00",
-      "source": "Yahoo Finance chart data",
-      "sourceUrl": "https://finance.yahoo.com/quote/PLTR",
-      "market": "US",
-      "score": 52.7,
-      "official": {
-        "source": "UK official sources",
-        "lseUrl": "https://www.londonstockexchange.com/",
-        "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"
-      }
-    },
-    {
-      "ticker": "IAG.L",
-      "name": "International Consolidated Airlines Group S.A.",
-      "currency": "GBp",
-      "exchange": "LSE",
-      "price": 416.1,
-      "previousClose": 374.1,
-      "change": 11.23,
-      "mom5": -3.5,
-      "volRatio": 0.29,
-      "rsi": 45.7,
-      "sma20": -2.81,
-      "volatility": 1.59,
-      "high90": -14.73,
-      "timestamp": "2026-09-11T07:00:00+00:00",
-      "source": "Yahoo Finance chart data",
-      "sourceUrl": "https://finance.yahoo.com/quote/IAG.L",
-      "market": "UK",
-      "score": 50.9,
-      "official": {
-        "source": "UK official sources",
-        "lseUrl": "https://www.londonstockexchange.com/",
-        "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"
+        "source": "SEC EDGAR unavailable this run",
+        "sourceUrl": "https://www.sec.gov/edgar/browse/?CIK=1018724&owner=exclude"
       }
     },
     {
@@ -347,25 +1488,625 @@
       "currency": "USD",
       "exchange": "NMS",
       "price": 363.56,
-      "previousClose": 399.24,
-      "change": -8.94,
+      "previousClose": 367.81,
+      "change": -1.16,
       "mom5": 1.83,
       "volRatio": 0.75,
       "rsi": 56.4,
       "sma20": 2.74,
       "volatility": 3.2,
       "high90": -18.35,
+      "history30": [
+        {
+          "date": "2026-07-30",
+          "close": 308.85
+        },
+        {
+          "date": "2026-07-31",
+          "close": 311.21
+        },
+        {
+          "date": "2026-08-03",
+          "close": 322.08
+        },
+        {
+          "date": "2026-08-04",
+          "close": 327.35
+        },
+        {
+          "date": "2026-08-05",
+          "close": 321.55
+        },
+        {
+          "date": "2026-08-06",
+          "close": 319.53
+        },
+        {
+          "date": "2026-08-07",
+          "close": 328.58
+        },
+        {
+          "date": "2026-08-10",
+          "close": 330.88
+        },
+        {
+          "date": "2026-08-11",
+          "close": 332.81
+        },
+        {
+          "date": "2026-08-12",
+          "close": 327.51
+        },
+        {
+          "date": "2026-08-13",
+          "close": 339.96
+        },
+        {
+          "date": "2026-08-14",
+          "close": 342.27
+        },
+        {
+          "date": "2026-08-17",
+          "close": 339.3
+        },
+        {
+          "date": "2026-08-18",
+          "close": 336.87
+        },
+        {
+          "date": "2026-08-19",
+          "close": 351.12
+        },
+        {
+          "date": "2026-08-20",
+          "close": 345.13
+        },
+        {
+          "date": "2026-08-21",
+          "close": 362.86
+        },
+        {
+          "date": "2026-08-24",
+          "close": 348.95
+        },
+        {
+          "date": "2026-08-25",
+          "close": 350.25
+        },
+        {
+          "date": "2026-08-26",
+          "close": 345.82
+        },
+        {
+          "date": "2026-08-27",
+          "close": 354.81
+        },
+        {
+          "date": "2026-08-28",
+          "close": 348.75
+        },
+        {
+          "date": "2026-08-31",
+          "close": 367.95
+        },
+        {
+          "date": "2026-09-01",
+          "close": 356.09
+        },
+        {
+          "date": "2026-09-02",
+          "close": 357.01
+        },
+        {
+          "date": "2026-09-03",
+          "close": 376.37
+        },
+        {
+          "date": "2026-09-04",
+          "close": 354.08
+        },
+        {
+          "date": "2026-09-08",
+          "close": 368.16
+        },
+        {
+          "date": "2026-09-09",
+          "close": 367.81
+        },
+        {
+          "date": "2026-09-10",
+          "close": 363.56
+        }
+      ],
       "timestamp": "2026-09-10T13:30:00+00:00",
       "source": "Yahoo Finance chart data",
       "sourceUrl": "https://finance.yahoo.com/quote/TSLA",
       "market": "US",
-      "score": 32.5,
+      "score": 44.0,
       "official": {
-        "source": "UK official sources",
-        "lseUrl": "https://www.londonstockexchange.com/",
-        "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"
+        "source": "SEC EDGAR unavailable this run",
+        "sourceUrl": "https://www.sec.gov/edgar/browse/?CIK=1318605&owner=exclude"
+      }
+    },
+    {
+      "ticker": "META",
+      "name": "Meta Platforms, Inc.",
+      "currency": "USD",
+      "exchange": "NMS",
+      "price": 644.38,
+      "previousClose": 653.69,
+      "change": -1.42,
+      "mom5": 8.69,
+      "volRatio": 1.24,
+      "rsi": 83.9,
+      "sma20": 10.37,
+      "volatility": 2.33,
+      "high90": -5.42,
+      "history30": [
+        {
+          "date": "2026-07-30",
+          "close": 539.03
+        },
+        {
+          "date": "2026-07-31",
+          "close": 556.71
+        },
+        {
+          "date": "2026-08-03",
+          "close": 590.24
+        },
+        {
+          "date": "2026-08-04",
+          "close": 587.94
+        },
+        {
+          "date": "2026-08-05",
+          "close": 588.77
+        },
+        {
+          "date": "2026-08-06",
+          "close": 589.9
+        },
+        {
+          "date": "2026-08-07",
+          "close": 592.1
+        },
+        {
+          "date": "2026-08-10",
+          "close": 594.92
+        },
+        {
+          "date": "2026-08-11",
+          "close": 599.12
+        },
+        {
+          "date": "2026-08-12",
+          "close": 578.85
+        },
+        {
+          "date": "2026-08-13",
+          "close": 594.97
+        },
+        {
+          "date": "2026-08-14",
+          "close": 589.85
+        },
+        {
+          "date": "2026-08-17",
+          "close": 568.97
+        },
+        {
+          "date": "2026-08-18",
+          "close": 543.67
+        },
+        {
+          "date": "2026-08-19",
+          "close": 546.03
+        },
+        {
+          "date": "2026-08-20",
+          "close": 545.83
+        },
+        {
+          "date": "2026-08-21",
+          "close": 549.9
+        },
+        {
+          "date": "2026-08-24",
+          "close": 559.02
+        },
+        {
+          "date": "2026-08-25",
+          "close": 570.05
+        },
+        {
+          "date": "2026-08-26",
+          "close": 576.14
+        },
+        {
+          "date": "2026-08-27",
+          "close": 571.1
+        },
+        {
+          "date": "2026-08-28",
+          "close": 578.02
+        },
+        {
+          "date": "2026-08-31",
+          "close": 572.34
+        },
+        {
+          "date": "2026-09-01",
+          "close": 578.54
+        },
+        {
+          "date": "2026-09-02",
+          "close": 592.85
+        },
+        {
+          "date": "2026-09-03",
+          "close": 610.68
+        },
+        {
+          "date": "2026-09-04",
+          "close": 616.77
+        },
+        {
+          "date": "2026-09-08",
+          "close": 613.48
+        },
+        {
+          "date": "2026-09-09",
+          "close": 653.69
+        },
+        {
+          "date": "2026-09-10",
+          "close": 644.38
+        }
+      ],
+      "timestamp": "2026-09-10T13:30:00+00:00",
+      "source": "Yahoo Finance chart data",
+      "sourceUrl": "https://finance.yahoo.com/quote/META",
+      "market": "US",
+      "score": 58.1,
+      "official": {
+        "source": "SEC EDGAR unavailable this run",
+        "sourceUrl": "https://www.sec.gov/edgar/browse/?CIK=1326801&owner=exclude"
+      }
+    },
+    {
+      "ticker": "PLTR",
+      "name": "Palantir Technologies Inc.",
+      "currency": "USD",
+      "exchange": "NMS",
+      "price": 165.86,
+      "previousClose": 169.53,
+      "change": -2.16,
+      "mom5": -2.12,
+      "volRatio": 0.7,
+      "rsi": 44.5,
+      "sma20": -5.84,
+      "volatility": 3.33,
+      "high90": -11.01,
+      "history30": [
+        {
+          "date": "2026-07-30",
+          "close": 122.26
+        },
+        {
+          "date": "2026-07-31",
+          "close": 123.06
+        },
+        {
+          "date": "2026-08-03",
+          "close": 125.65
+        },
+        {
+          "date": "2026-08-04",
+          "close": 162.66
+        },
+        {
+          "date": "2026-08-05",
+          "close": 158.43
+        },
+        {
+          "date": "2026-08-06",
+          "close": 155.92
+        },
+        {
+          "date": "2026-08-07",
+          "close": 172.01
+        },
+        {
+          "date": "2026-08-10",
+          "close": 175.23
+        },
+        {
+          "date": "2026-08-11",
+          "close": 174.94
+        },
+        {
+          "date": "2026-08-12",
+          "close": 171.04
+        },
+        {
+          "date": "2026-08-13",
+          "close": 179.01
+        },
+        {
+          "date": "2026-08-14",
+          "close": 174.04
+        },
+        {
+          "date": "2026-08-17",
+          "close": 172.55
+        },
+        {
+          "date": "2026-08-18",
+          "close": 171.54
+        },
+        {
+          "date": "2026-08-19",
+          "close": 175.19
+        },
+        {
+          "date": "2026-08-20",
+          "close": 173.96
+        },
+        {
+          "date": "2026-08-21",
+          "close": 179.94
+        },
+        {
+          "date": "2026-08-24",
+          "close": 175.89
+        },
+        {
+          "date": "2026-08-25",
+          "close": 172.73
+        },
+        {
+          "date": "2026-08-26",
+          "close": 177.5
+        },
+        {
+          "date": "2026-08-27",
+          "close": 185.93
+        },
+        {
+          "date": "2026-08-28",
+          "close": 186.29
+        },
+        {
+          "date": "2026-08-31",
+          "close": 186.38
+        },
+        {
+          "date": "2026-09-01",
+          "close": 179.92
+        },
+        {
+          "date": "2026-09-02",
+          "close": 169.46
+        },
+        {
+          "date": "2026-09-03",
+          "close": 182.53
+        },
+        {
+          "date": "2026-09-04",
+          "close": 174.33
+        },
+        {
+          "date": "2026-09-08",
+          "close": 170.3
+        },
+        {
+          "date": "2026-09-09",
+          "close": 169.53
+        },
+        {
+          "date": "2026-09-10",
+          "close": 165.86
+        }
+      ],
+      "timestamp": "2026-09-10T13:30:00+00:00",
+      "source": "Yahoo Finance chart data",
+      "sourceUrl": "https://finance.yahoo.com/quote/PLTR",
+      "market": "US",
+      "score": 28.2,
+      "official": {
+        "source": "SEC EDGAR unavailable this run",
+        "sourceUrl": "https://www.sec.gov/edgar/browse/?CIK=1321655&owner=exclude"
+      }
+    },
+    {
+      "ticker": "NVDA",
+      "name": "NVIDIA Corporation",
+      "currency": "USD",
+      "exchange": "NMS",
+      "price": 218.36,
+      "previousClose": 223.67,
+      "change": -2.37,
+      "mom5": -2.7,
+      "volRatio": 0.82,
+      "rsi": 51.0,
+      "sma20": -0.98,
+      "volatility": 2.74,
+      "high90": -7.37,
+      "history30": [
+        {
+          "date": "2026-07-30",
+          "close": 195.04
+        },
+        {
+          "date": "2026-07-31",
+          "close": 200.75
+        },
+        {
+          "date": "2026-08-03",
+          "close": 206.64
+        },
+        {
+          "date": "2026-08-04",
+          "close": 211.94
+        },
+        {
+          "date": "2026-08-05",
+          "close": 219.22
+        },
+        {
+          "date": "2026-08-06",
+          "close": 218.99
+        },
+        {
+          "date": "2026-08-07",
+          "close": 223.96
+        },
+        {
+          "date": "2026-08-10",
+          "close": 217.55
+        },
+        {
+          "date": "2026-08-11",
+          "close": 217.5
+        },
+        {
+          "date": "2026-08-12",
+          "close": 224.09
+        },
+        {
+          "date": "2026-08-13",
+          "close": 225.3
+        },
+        {
+          "date": "2026-08-14",
+          "close": 225.16
+        },
+        {
+          "date": "2026-08-17",
+          "close": 225.01
+        },
+        {
+          "date": "2026-08-18",
+          "close": 219.74
+        },
+        {
+          "date": "2026-08-19",
+          "close": 217.56
+        },
+        {
+          "date": "2026-08-20",
+          "close": 216.85
+        },
+        {
+          "date": "2026-08-21",
+          "close": 214.72
+        },
+        {
+          "date": "2026-08-24",
+          "close": 208.48
+        },
+        {
+          "date": "2026-08-25",
+          "close": 213.05
+        },
+        {
+          "date": "2026-08-26",
+          "close": 209.66
+        },
+        {
+          "date": "2026-08-27",
+          "close": 227.98
+        },
+        {
+          "date": "2026-08-28",
+          "close": 217.55
+        },
+        {
+          "date": "2026-08-31",
+          "close": 220.78
+        },
+        {
+          "date": "2026-09-01",
+          "close": 217.44
+        },
+        {
+          "date": "2026-09-02",
+          "close": 224.41
+        },
+        {
+          "date": "2026-09-03",
+          "close": 228.45
+        },
+        {
+          "date": "2026-09-04",
+          "close": 230.36
+        },
+        {
+          "date": "2026-09-08",
+          "close": 225.73
+        },
+        {
+          "date": "2026-09-09",
+          "close": 223.67
+        },
+        {
+          "date": "2026-09-10",
+          "close": 218.36
+        }
+      ],
+      "timestamp": "2026-09-10T13:30:00+00:00",
+      "source": "Yahoo Finance chart data",
+      "sourceUrl": "https://finance.yahoo.com/quote/NVDA",
+      "market": "US",
+      "score": 31.7,
+      "official": {
+        "source": "SEC EDGAR unavailable this run",
+        "sourceUrl": "https://www.sec.gov/edgar/browse/?CIK=1045810&owner=exclude"
       }
     }
   ],
-  "errors": []
+  "errors": [
+    {
+      "ticker": "NVDA",
+      "source": "SEC",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "ticker": "PLTR",
+      "source": "SEC",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "ticker": "AAPL",
+      "source": "SEC",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "ticker": "MSFT",
+      "source": "SEC",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "ticker": "AMZN",
+      "source": "SEC",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "ticker": "GOOGL",
+      "source": "SEC",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "ticker": "META",
+      "source": "SEC",
+      "error": "HTTP Error 403: Forbidden"
+    },
+    {
+      "ticker": "TSLA",
+      "source": "SEC",
+      "error": "HTTP Error 403: Forbidden"
+    }
+  ]
 }
