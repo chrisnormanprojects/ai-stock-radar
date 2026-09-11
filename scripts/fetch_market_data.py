@@ -5,7 +5,7 @@ from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "data", "market.json")
-UA = "AIStockRadar/2.2 (+https://github.com/chrisnormanprojects/ai-stock-radar; chrisnormanprojects@users.noreply.github.com)"
+UA = "AIStockRadar/2.3 (+https://github.com/chrisnormanprojects/ai-stock-radar; chrisnormanprojects@users.noreply.github.com)"
 
 SYMBOLS = [
     {"ticker":"NVDA","market":"US"}, {"ticker":"PLTR","market":"US"},
@@ -55,7 +55,7 @@ def score_row(change,mom5,vol_ratio,sma20,rsi):
     return round(clamp(score,0,100),1)
 
 def yahoo_chart(ticker):
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(ticker)}?range=6mo&interval=1d&includePrePost=false&events=div%2Csplits"
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(ticker)}?range=1y&interval=1d&includePrePost=false&events=div%2Csplits"
     data=get_json(url)
     result=(data.get("chart",{}).get("result") or [None])[0]
     if not result: raise RuntimeError("Yahoo returned no chart result")
@@ -78,9 +78,9 @@ def yahoo_chart(ticker):
     sma=sum(cs[-20:])/20; sma20=(price/sma-1)*100 if sma else 0
     high90=max(cs[-90:]); high90pct=(price/high90-1)*100 if high90 else 0
     rsi=rsi14(cs); vola=volatility20(cs)
-    history30=[
+    history=[
         {"date": datetime.fromtimestamp(ts,timezone.utc).strftime("%Y-%m-%d"), "close": round(close,4)}
-        for ts,close,_ in rows[-30:]
+        for ts,close,_ in rows
     ]
     return {
         "ticker":ticker,
@@ -89,7 +89,7 @@ def yahoo_chart(ticker):
         "price":round(price,4), "previousClose":round(prev,4), "change":round(change,2),
         "mom5":round(mom5,2), "volRatio":round(vr,2), "rsi":round(rsi,1) if rsi is not None else None,
         "sma20":round(sma20,2), "volatility":round(vola,2) if vola is not None else None,
-        "high90":round(high90pct,2), "history30":history30,
+        "high90":round(high90pct,2), "history":history,
         "timestamp":datetime.fromtimestamp(rows[-1][0],timezone.utc).isoformat(),
         "source":"Yahoo Finance chart data", "sourceUrl":f"https://finance.yahoo.com/quote/{quote(ticker)}"
     }
