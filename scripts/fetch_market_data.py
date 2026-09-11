@@ -5,16 +5,38 @@ from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "data", "market.json")
-UA = "AIStockRadar/2.3 (+https://github.com/chrisnormanprojects/ai-stock-radar; chrisnormanprojects@users.noreply.github.com)"
+UA = "AIStockRadar/2.4 (+https://github.com/chrisnormanprojects/ai-stock-radar; chrisnormanprojects@users.noreply.github.com)"
 
+# 50 liquid, widely followed US and UK shares. This is intentionally curated rather
+# than attempting to scrape an entire exchange in one GitHub Actions run.
 SYMBOLS = [
+    # US (30)
     {"ticker":"NVDA","market":"US"}, {"ticker":"PLTR","market":"US"},
     {"ticker":"AAPL","market":"US"}, {"ticker":"MSFT","market":"US"},
     {"ticker":"AMZN","market":"US"}, {"ticker":"GOOGL","market":"US"},
     {"ticker":"META","market":"US"}, {"ticker":"TSLA","market":"US"},
+    {"ticker":"AVGO","market":"US"}, {"ticker":"AMD","market":"US"},
+    {"ticker":"NFLX","market":"US"}, {"ticker":"ORCL","market":"US"},
+    {"ticker":"CRM","market":"US"}, {"ticker":"JPM","market":"US"},
+    {"ticker":"BAC","market":"US"}, {"ticker":"WMT","market":"US"},
+    {"ticker":"COST","market":"US"}, {"ticker":"DIS","market":"US"},
+    {"ticker":"UBER","market":"US"}, {"ticker":"INTC","market":"US"},
+    {"ticker":"QCOM","market":"US"}, {"ticker":"MU","market":"US"},
+    {"ticker":"ARM","market":"US"}, {"ticker":"COIN","market":"US"},
+    {"ticker":"HOOD","market":"US"}, {"ticker":"SOFI","market":"US"},
+    {"ticker":"NKE","market":"US"}, {"ticker":"BA","market":"US"},
+    {"ticker":"CAT","market":"US"}, {"ticker":"XOM","market":"US"},
+    # UK (20)
     {"ticker":"RR.L","market":"UK"}, {"ticker":"VOD.L","market":"UK"},
     {"ticker":"SHEL.L","market":"UK"}, {"ticker":"LLOY.L","market":"UK"},
-    {"ticker":"BARC.L","market":"UK"}, {"ticker":"IAG.L","market":"UK"}
+    {"ticker":"BARC.L","market":"UK"}, {"ticker":"IAG.L","market":"UK"},
+    {"ticker":"HSBA.L","market":"UK"}, {"ticker":"BP.L","market":"UK"},
+    {"ticker":"AZN.L","market":"UK"}, {"ticker":"GSK.L","market":"UK"},
+    {"ticker":"ULVR.L","market":"UK"}, {"ticker":"DGE.L","market":"UK"},
+    {"ticker":"NG.L","market":"UK"}, {"ticker":"BT.A.L","market":"UK"},
+    {"ticker":"SBRY.L","market":"UK"}, {"ticker":"TSCO.L","market":"UK"},
+    {"ticker":"EZJ.L","market":"UK"}, {"ticker":"WIZZ.L","market":"UK"},
+    {"ticker":"CCL.L","market":"UK"}, {"ticker":"MKS.L","market":"UK"}
 ]
 
 CIKS = {
@@ -78,10 +100,7 @@ def yahoo_chart(ticker):
     sma=sum(cs[-20:])/20; sma20=(price/sma-1)*100 if sma else 0
     high90=max(cs[-90:]); high90pct=(price/high90-1)*100 if high90 else 0
     rsi=rsi14(cs); vola=volatility20(cs)
-    history=[
-        {"date": datetime.fromtimestamp(ts,timezone.utc).strftime("%Y-%m-%d"), "close": round(close,4)}
-        for ts,close,_ in rows
-    ]
+    history=[{"date":datetime.fromtimestamp(ts,timezone.utc).strftime("%Y-%m-%d"),"close":round(close,4)} for ts,close,_ in rows]
     return {
         "ticker":ticker,
         "name":meta.get("longName") or meta.get("shortName") or ticker,
@@ -124,14 +143,12 @@ def sec_company(cik):
         "latestFiling":filing,
         "revenue":latest_fact(facts,["RevenueFromContractWithCustomerExcludingAssessedTax","Revenues","SalesRevenueNet"],"USD"),
         "netIncome":latest_fact(facts,["NetIncomeLoss","ProfitLoss"],"USD"),
-        "assets":latest_fact(facts,["Assets"],"USD"),
-        "liabilities":latest_fact(facts,["Liabilities"],"USD"),
+        "assets":latest_fact(facts,["Assets"],"USD"), "liabilities":latest_fact(facts,["Liabilities"],"USD"),
         "eps":latest_fact(facts,["EarningsPerShareDiluted","EarningsPerShareBasic"],"USD/shares")
     }
 
 def main():
-    generated=datetime.now(timezone.utc).isoformat()
-    stocks=[]; errors=[]
+    generated=datetime.now(timezone.utc).isoformat(); stocks=[]; errors=[]
     for item in SYMBOLS:
         t=item["ticker"]
         try:
@@ -142,24 +159,18 @@ def main():
                 except Exception as e:
                     y["official"]={"source":"SEC EDGAR unavailable this run","sourceUrl":f"https://www.sec.gov/edgar/browse/?CIK={CIKS[t]}&owner=exclude"}
                     errors.append({"ticker":t,"source":"SEC","error":str(e)})
+            elif item["market"]=="US":
+                y["official"]={"source":"SEC EDGAR link","sourceUrl":"https://www.sec.gov/edgar/search/"}
             else:
                 y["official"]={"source":"UK official sources","lseUrl":"https://www.londonstockexchange.com/","companiesHouseUrl":"https://find-and-update.company-information.service.gov.uk/"}
             stocks.append(y)
         except Exception as e:
             errors.append({"ticker":t,"source":"Yahoo","error":str(e)})
-        time.sleep(0.35)
+        time.sleep(0.25)
     stocks.sort(key=lambda x:x.get("change",0),reverse=True)
-    payload={
-        "generatedAt":generated,
-        "keyless":True,
-        "providers":[
-            {"name":"Yahoo Finance","type":"market prices/history","authentication":"none","note":"Unofficial endpoint; may change or rate-limit."},
-            {"name":"SEC EDGAR","type":"US primary filings/XBRL facts","authentication":"none","note":"Official SEC public data."}
-        ],
-        "stocks":stocks,"errors":errors
-    }
+    payload={"generatedAt":generated,"keyless":True,"universeSize":len(SYMBOLS),"providers":[{"name":"Yahoo Finance","type":"market prices/history","authentication":"none","note":"Unofficial endpoint; may change or rate-limit."},{"name":"SEC EDGAR","type":"US primary filings/XBRL facts","authentication":"none","note":"Official SEC public data."}],"stocks":stocks,"errors":errors}
     os.makedirs(os.path.dirname(OUT),exist_ok=True)
     with open(OUT,"w",encoding="utf-8") as f: json.dump(payload,f,indent=2,ensure_ascii=False)
-    print(f"wrote {len(stocks)} stocks, {len(errors)} errors")
+    print(f"wrote {len(stocks)} of {len(SYMBOLS)} stocks, {len(errors)} errors")
 
 if __name__=="__main__": main()
