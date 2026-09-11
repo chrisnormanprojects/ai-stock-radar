@@ -1,4 +1,4 @@
-const CACHE = "ai-stock-radar-v2";
+const CACHE = "ai-stock-radar-v3";
 const ASSETS = [
   "./",
   "./index.html",
@@ -24,12 +24,11 @@ self.addEventListener("activate", event => {
 
 self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
-
   const url = new URL(event.request.url);
 
-  // Never cache live API calls.
-  if (url.hostname.includes("alphavantage.co")) {
-    event.respondWith(fetch(event.request));
+  // Always fetch generated market data fresh. The app keeps its own local fallback.
+  if (url.pathname.endsWith("/data/market.json")) {
+    event.respondWith(fetch(event.request, {cache:"no-store"}));
     return;
   }
 
