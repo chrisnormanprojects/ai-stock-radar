@@ -1,4 +1,4 @@
-const CACHE = "ai-stock-radar-v4";
+const CACHE = "ai-stock-radar-v5";
 const ASSETS = [
   "./",
   "./index.html",
@@ -26,7 +26,6 @@ self.addEventListener("fetch", event => {
   if (event.request.method !== "GET") return;
   const url = new URL(event.request.url);
 
-  // Always fetch generated market data fresh. The app keeps its own local fallback.
   if (url.pathname.endsWith("/data/market.json")) {
     event.respondWith(fetch(event.request, {cache:"no-store"}));
     return;
