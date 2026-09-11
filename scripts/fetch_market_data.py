@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-import json, math, os, statistics, time
+import json, os, statistics, time
 from datetime import datetime, timezone
 from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "data", "market.json")
-UA = "AIStockRadar/2.0 (+https://github.com/chrisnormanprojects/ai-stock-radar; chrisnormanprojects@users.noreply.github.com)"
+UA = "AIStockRadar/2.1 (+https://github.com/chrisnormanprojects/ai-stock-radar; chrisnormanprojects@users.noreply.github.com)"
 
 SYMBOLS = [
     {"ticker":"NVDA","market":"US"}, {"ticker":"PLTR","market":"US"},
@@ -16,6 +16,19 @@ SYMBOLS = [
     {"ticker":"SHEL.L","market":"UK"}, {"ticker":"LLOY.L","market":"UK"},
     {"ticker":"BARC.L","market":"UK"}, {"ticker":"IAG.L","market":"UK"}
 ]
+
+# Stable SEC CIK identifiers for the US symbols above. Hard-coding these avoids a
+# separate ticker-map request and keeps the workflow independent of another endpoint.
+CIKS = {
+    "AAPL": 320193,
+    "MSFT": 789019,
+    "NVDA": 1045810,
+    "TSLA": 1318605,
+    "AMZN": 1018724,
+    "GOOGL": 1652044,
+    "META": 1326801,
+    "PLTR": 1321655,
+}
 
 def get_json(url, ua=UA, timeout=25):
     req = Request(url, headers={"User-Agent":ua, "Accept":"application/json"})
@@ -62,15 +75,17 @@ def yahoo_chart(ticker):
     for ts,c,v in zip(timestamps,closes,volumes):
         if c is not None:
             rows.append((ts,float(c),float(v or 0)))
-    if len(rows)<6: raise RuntimeError("Not enough Yahoo history")
+    if len(rows)<21: raise RuntimeError("Not enough Yahoo history")
     cs=[r[1] for r in rows]; vs=[r[2] for r in rows]
     price=float(meta.get("regularMarketPrice") or cs[-1])
-    prev=float(meta.get("chartPreviousClose") or (cs[-2] if len(cs)>1 else price))
+    # chartPreviousClose can represent the close before the whole requested range.
+    # For a true daily move, use the two most recent daily closes instead.
+    prev=float(cs[-2])
     change=(price/prev-1)*100 if prev else 0
-    mom5=(price/cs[-6]-1)*100 if len(cs)>=6 and cs[-6] else 0
+    mom5=(price/cs[-6]-1)*100 if cs[-6] else 0
     avgvol=sum(vs[-21:-1])/max(1,len(vs[-21:-1]))
     vr=(vs[-1]/avgvol) if avgvol else 1
-    sma=sum(cs[-20:])/min(20,len(cs)); sma20=(price/sma-1)*100 if sma else 0
+    sma=sum(cs[-20:])/20; sma20=(price/sma-1)*100 if sma else 0
     high90=max(cs[-90:]); high90pct=(price/high90-1)*100 if high90 else 0
     rsi=rsi14(cs); vola=volatility20(cs)
     return {
@@ -84,12 +99,6 @@ def yahoo_chart(ticker):
         "source":"Yahoo Finance chart data", "sourceUrl":f"https://finance.yahoo.com/quote/{quote(ticker)}"
     }
 
-def cik_map():
-    data=get_json("https://www.sec.gov/files/company_tickers.json")
-    out={}
-    for item in data.values(): out[item.get("ticker","").upper()]=int(item["cik_str"])
-    return out
-
 def latest_fact(facts, concepts, unit):
     us=facts.get("facts",{}).get("us-gaap",{})
     rows=[]
@@ -101,14 +110,13 @@ def latest_fact(facts, concepts, unit):
     filed,end,val,c,form=sorted(rows, reverse=True)[0]
     return {"value":val,"filed":filed,"end":end,"form":form,"concept":c}
 
-def sec_company(ticker,cik):
+def sec_company(cik):
     cik10=f"{cik:010d}"
     sub=get_json(f"https://data.sec.gov/submissions/CIK{cik10}.json")
     rec=sub.get("filings",{}).get("recent",{})
     forms=rec.get("form",[]); dates=rec.get("filingDate",[]); accs=rec.get("accessionNumber",[]); docs=rec.get("primaryDocument",[])
     filing=None
-    preferred=("10-Q","10-K","8-K")
-    for wanted in preferred:
+    for wanted in ("10-Q","10-K","8-K"):
         for i,form in enumerate(forms):
             if form==wanted:
                 accession=accs[i].replace("-","")
@@ -128,24 +136,23 @@ def sec_company(ticker,cik):
 
 def main():
     generated=datetime.now(timezone.utc).isoformat()
-    cmap={}
-    try: cmap=cik_map()
-    except Exception as e: print("SEC ticker map failed:",e)
     stocks=[]; errors=[]
     for item in SYMBOLS:
         t=item["ticker"]
         try:
             y=yahoo_chart(t); y["market"]=item["market"]
             y["score"]=score_row(y["change"],y["mom5"],y["volRatio"],y["sma20"],y["rsi"])
-            if item["market"]=="US" and t in cmap:
-                try: y["official"]=sec_company(t,cmap[t])
-                except Exception as e: errors.append({"ticker":t,"source":"SEC","error":str(e)})
+            if item["market"]=="US" and t in CIKS:
+                try: y["official"]=sec_company(CIKS[t])
+                except Exception as e:
+                    y["official"]={"source":"SEC EDGAR unavailable this run","sourceUrl":f"https://www.sec.gov/edgar/browse/?CIK={CIKS[t]}&owner=exclude"}
+                    errors.append({"ticker":t,"source":"SEC","error":str(e)})
             else:
                 y["official"]={"source":"UK official sources","lseUrl":"https://www.londonstockexchange.com/","companiesHouseUrl":"https://find-and-update.company-information.service.gov.uk/"}
             stocks.append(y)
         except Exception as e:
             errors.append({"ticker":t,"source":"Yahoo","error":str(e)})
-        time.sleep(0.25)
+        time.sleep(0.35)
     stocks.sort(key=lambda x:x.get("score",0),reverse=True)
     payload={
         "generatedAt":generated,
