@@ -5,7 +5,7 @@ from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "data", "market.json")
-UA = "AIStockRadar/2.1 (+https://github.com/chrisnormanprojects/ai-stock-radar; chrisnormanprojects@users.noreply.github.com)"
+UA = "AIStockRadar/2.2 (+https://github.com/chrisnormanprojects/ai-stock-radar; chrisnormanprojects@users.noreply.github.com)"
 
 SYMBOLS = [
     {"ticker":"NVDA","market":"US"}, {"ticker":"PLTR","market":"US"},
@@ -17,17 +17,9 @@ SYMBOLS = [
     {"ticker":"BARC.L","market":"UK"}, {"ticker":"IAG.L","market":"UK"}
 ]
 
-# Stable SEC CIK identifiers for the US symbols above. Hard-coding these avoids a
-# separate ticker-map request and keeps the workflow independent of another endpoint.
 CIKS = {
-    "AAPL": 320193,
-    "MSFT": 789019,
-    "NVDA": 1045810,
-    "TSLA": 1318605,
-    "AMZN": 1018724,
-    "GOOGL": 1652044,
-    "META": 1326801,
-    "PLTR": 1321655,
+    "AAPL": 320193, "MSFT": 789019, "NVDA": 1045810, "TSLA": 1318605,
+    "AMZN": 1018724, "GOOGL": 1652044, "META": 1326801, "PLTR": 1321655,
 }
 
 def get_json(url, ua=UA, timeout=25):
@@ -78,8 +70,6 @@ def yahoo_chart(ticker):
     if len(rows)<21: raise RuntimeError("Not enough Yahoo history")
     cs=[r[1] for r in rows]; vs=[r[2] for r in rows]
     price=float(meta.get("regularMarketPrice") or cs[-1])
-    # chartPreviousClose can represent the close before the whole requested range.
-    # For a true daily move, use the two most recent daily closes instead.
     prev=float(cs[-2])
     change=(price/prev-1)*100 if prev else 0
     mom5=(price/cs[-6]-1)*100 if cs[-6] else 0
@@ -88,6 +78,10 @@ def yahoo_chart(ticker):
     sma=sum(cs[-20:])/20; sma20=(price/sma-1)*100 if sma else 0
     high90=max(cs[-90:]); high90pct=(price/high90-1)*100 if high90 else 0
     rsi=rsi14(cs); vola=volatility20(cs)
+    history30=[
+        {"date": datetime.fromtimestamp(ts,timezone.utc).strftime("%Y-%m-%d"), "close": round(close,4)}
+        for ts,close,_ in rows[-30:]
+    ]
     return {
         "ticker":ticker,
         "name":meta.get("longName") or meta.get("shortName") or ticker,
@@ -95,7 +89,8 @@ def yahoo_chart(ticker):
         "price":round(price,4), "previousClose":round(prev,4), "change":round(change,2),
         "mom5":round(mom5,2), "volRatio":round(vr,2), "rsi":round(rsi,1) if rsi is not None else None,
         "sma20":round(sma20,2), "volatility":round(vola,2) if vola is not None else None,
-        "high90":round(high90pct,2), "timestamp":datetime.fromtimestamp(rows[-1][0],timezone.utc).isoformat(),
+        "high90":round(high90pct,2), "history30":history30,
+        "timestamp":datetime.fromtimestamp(rows[-1][0],timezone.utc).isoformat(),
         "source":"Yahoo Finance chart data", "sourceUrl":f"https://finance.yahoo.com/quote/{quote(ticker)}"
     }
 
@@ -153,7 +148,7 @@ def main():
         except Exception as e:
             errors.append({"ticker":t,"source":"Yahoo","error":str(e)})
         time.sleep(0.35)
-    stocks.sort(key=lambda x:x.get("score",0),reverse=True)
+    stocks.sort(key=lambda x:x.get("change",0),reverse=True)
     payload={
         "generatedAt":generated,
         "keyless":True,
