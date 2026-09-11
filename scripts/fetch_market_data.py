@@ -1,143 +1,241 @@
 #!/usr/bin/env python3
-import json, os, statistics, time
+import html, json, os, re, statistics, time
 from datetime import datetime, timezone
-from urllib.parse import quote
+from urllib.parse import quote, unquote
 from urllib.request import Request, urlopen
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "data", "market.json")
-UA = "AIStockRadar/2.5 (+https://github.com/chrisnormanprojects/ai-stock-radar; chrisnormanprojects@users.noreply.github.com)"
+UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 AIStockRadar/3.0"
+FTSE_ALL_SHARE_URL = "https://www.lse.co.uk/indices/ftse-all-share/constituents.html"
+EXPECTED_CONSTITUENTS = 534
+TOP_N = 30
+BATCH_SIZE = 35
 
-# Curated liquid, widely followed shares. 60 US + 40 UK = 100 total.
-SYMBOLS = [
-    # US (60)
-    {"ticker":"NVDA","market":"US"},{"ticker":"PLTR","market":"US"},{"ticker":"AAPL","market":"US"},{"ticker":"MSFT","market":"US"},{"ticker":"AMZN","market":"US"},{"ticker":"GOOGL","market":"US"},{"ticker":"META","market":"US"},{"ticker":"TSLA","market":"US"},{"ticker":"AVGO","market":"US"},{"ticker":"AMD","market":"US"},
-    {"ticker":"NFLX","market":"US"},{"ticker":"ORCL","market":"US"},{"ticker":"CRM","market":"US"},{"ticker":"JPM","market":"US"},{"ticker":"BAC","market":"US"},{"ticker":"WMT","market":"US"},{"ticker":"COST","market":"US"},{"ticker":"DIS","market":"US"},{"ticker":"UBER","market":"US"},{"ticker":"INTC","market":"US"},
-    {"ticker":"QCOM","market":"US"},{"ticker":"MU","market":"US"},{"ticker":"ARM","market":"US"},{"ticker":"COIN","market":"US"},{"ticker":"HOOD","market":"US"},{"ticker":"SOFI","market":"US"},{"ticker":"NKE","market":"US"},{"ticker":"BA","market":"US"},{"ticker":"CAT","market":"US"},{"ticker":"XOM","market":"US"},
-    {"ticker":"V","market":"US"},{"ticker":"MA","market":"US"},{"ticker":"PYPL","market":"US"},{"ticker":"ADBE","market":"US"},{"ticker":"IBM","market":"US"},{"ticker":"CSCO","market":"US"},{"ticker":"TXN","market":"US"},{"ticker":"AMAT","market":"US"},{"ticker":"LRCX","market":"US"},{"ticker":"NOW","market":"US"},
-    {"ticker":"SHOP","market":"US"},{"ticker":"ABNB","market":"US"},{"ticker":"BKNG","market":"US"},{"ticker":"SBUX","market":"US"},{"ticker":"PEP","market":"US"},{"ticker":"KO","market":"US"},{"ticker":"MCD","market":"US"},{"ticker":"HD","market":"US"},{"ticker":"LOW","market":"US"},{"ticker":"TGT","market":"US"},
-    {"ticker":"UNH","market":"US"},{"ticker":"LLY","market":"US"},{"ticker":"JNJ","market":"US"},{"ticker":"PFE","market":"US"},{"ticker":"MRK","market":"US"},{"ticker":"ABBV","market":"US"},{"ticker":"CVX","market":"US"},{"ticker":"COP","market":"US"},{"ticker":"GE","market":"US"},{"ticker":"GS","market":"US"},
-    # UK (40)
-    {"ticker":"RR.L","market":"UK"},{"ticker":"VOD.L","market":"UK"},{"ticker":"SHEL.L","market":"UK"},{"ticker":"LLOY.L","market":"UK"},{"ticker":"BARC.L","market":"UK"},{"ticker":"IAG.L","market":"UK"},{"ticker":"HSBA.L","market":"UK"},{"ticker":"BP.L","market":"UK"},{"ticker":"AZN.L","market":"UK"},{"ticker":"GSK.L","market":"UK"},
-    {"ticker":"ULVR.L","market":"UK"},{"ticker":"DGE.L","market":"UK"},{"ticker":"NG.L","market":"UK"},{"ticker":"BT-A.L","market":"UK"},{"ticker":"SBRY.L","market":"UK"},{"ticker":"TSCO.L","market":"UK"},{"ticker":"EZJ.L","market":"UK"},{"ticker":"WIZZ.L","market":"UK"},{"ticker":"CCL.L","market":"UK"},{"ticker":"MKS.L","market":"UK"},
-    {"ticker":"RIO.L","market":"UK"},{"ticker":"BHP.L","market":"UK"},{"ticker":"AAL.L","market":"UK"},{"ticker":"GLEN.L","market":"UK"},{"ticker":"BATS.L","market":"UK"},{"ticker":"IMB.L","market":"UK"},{"ticker":"PRU.L","market":"UK"},{"ticker":"AV.L","market":"UK"},{"ticker":"LGEN.L","market":"UK"},{"ticker":"NWG.L","market":"UK"},
-    {"ticker":"STAN.L","market":"UK"},{"ticker":"CNA.L","market":"UK"},{"ticker":"SSE.L","market":"UK"},{"ticker":"REL.L","market":"UK"},{"ticker":"LSEG.L","market":"UK"},{"ticker":"EXPN.L","market":"UK"},{"ticker":"HLMA.L","market":"UK"},{"ticker":"AUTO.L","market":"UK"},{"ticker":"INF.L","market":"UK"},{"ticker":"CPG.L","market":"UK"}
-]
 
-CIKS = {
-    "AAPL":320193,"MSFT":789019,"NVDA":1045810,"TSLA":1318605,
-    "AMZN":1018724,"GOOGL":1652044,"META":1326801,"PLTR":1321655,
-}
-
-def get_json(url, ua=UA, timeout=25):
-    req = Request(url, headers={"User-Agent":ua,"Accept":"application/json"})
+def get_text(url, timeout=35):
+    req = Request(url, headers={"User-Agent": UA, "Accept": "text/html,application/xhtml+xml,application/json"})
     with urlopen(req, timeout=timeout) as r:
-        return json.loads(r.read().decode("utf-8"))
+        return r.read().decode("utf-8", errors="replace")
 
-def clamp(n,a,b): return max(a,min(b,n))
+
+def get_json(url, timeout=35):
+    return json.loads(get_text(url, timeout=timeout))
+
+
+def clamp(n, a, b):
+    return max(a, min(b, n))
+
 
 def rsi14(closes):
-    if len(closes)<15: return None
-    seq=closes[-15:]; gains=[]; losses=[]
-    for a,b in zip(seq[:-1],seq[1:]):
-        d=b-a; gains.append(max(d,0)); losses.append(max(-d,0))
-    ag=sum(gains)/14; al=sum(losses)/14
-    if al==0: return 100.0
-    return 100-100/(1+ag/al)
+    if len(closes) < 15:
+        return None
+    seq = closes[-15:]
+    gains, losses = [], []
+    for a, b in zip(seq[:-1], seq[1:]):
+        d = b - a
+        gains.append(max(d, 0))
+        losses.append(max(-d, 0))
+    ag = sum(gains) / 14
+    al = sum(losses) / 14
+    if al == 0:
+        return 100.0
+    return 100 - 100 / (1 + ag / al)
+
 
 def volatility20(closes):
-    if len(closes)<3: return None
-    rs=[(b/a-1)*100 for a,b in zip(closes[-21:-1],closes[-20:]) if a]
-    return statistics.pstdev(rs) if len(rs)>1 else 0.0
+    if len(closes) < 3:
+        return None
+    tail = closes[-21:]
+    rs = [(b / a - 1) * 100 for a, b in zip(tail[:-1], tail[1:]) if a]
+    return statistics.pstdev(rs) if len(rs) > 1 else 0.0
 
-def score_row(change,mom5,vol_ratio,sma20,rsi):
-    score=45
-    score+=clamp(change*3.0,-15,18)
-    score+=clamp(mom5*1.4,-10,16)
-    score+=clamp((vol_ratio-1)*9,-5,12)
-    score+=clamp(sma20*0.8,-6,8)
-    if rsi is not None and rsi>75: score-=5
-    if rsi is not None and rsi<30: score-=2
-    return round(clamp(score,0,100),1)
 
-def yahoo_chart(ticker):
-    url=f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(ticker)}?range=1y&interval=1d&includePrePost=false&events=div%2Csplits"
-    data=get_json(url)
-    result=(data.get("chart",{}).get("result") or [None])[0]
-    if not result: raise RuntimeError("Yahoo returned no chart result")
-    meta=result.get("meta",{}); q=((result.get("indicators",{}).get("quote") or [{}])[0])
-    timestamps=result.get("timestamp") or []; closes=q.get("close") or []; volumes=q.get("volume") or []
-    rows=[]
-    for ts,c,v in zip(timestamps,closes,volumes):
-        if c is not None: rows.append((ts,float(c),float(v or 0)))
-    if len(rows)<21: raise RuntimeError("Not enough Yahoo history")
-    cs=[r[1] for r in rows]; vs=[r[2] for r in rows]
-    price=float(meta.get("regularMarketPrice") or cs[-1]); prev=float(cs[-2])
-    change=(price/prev-1)*100 if prev else 0; mom5=(price/cs[-6]-1)*100 if cs[-6] else 0
-    avgvol=sum(vs[-21:-1])/max(1,len(vs[-21:-1])); vr=(vs[-1]/avgvol) if avgvol else 1
-    sma=sum(cs[-20:])/20; sma20=(price/sma-1)*100 if sma else 0
-    high90=max(cs[-90:]); high90pct=(price/high90-1)*100 if high90 else 0
-    rsi=rsi14(cs); vola=volatility20(cs)
-    history=[{"date":datetime.fromtimestamp(ts,timezone.utc).strftime("%Y-%m-%d"),"close":round(close,4)} for ts,close,_ in rows]
-    return {
-        "ticker":ticker,"name":meta.get("longName") or meta.get("shortName") or ticker,
-        "currency":meta.get("currency"),"exchange":meta.get("exchangeName") or meta.get("fullExchangeName"),
-        "price":round(price,4),"previousClose":round(prev,4),"change":round(change,2),"mom5":round(mom5,2),
-        "volRatio":round(vr,2),"rsi":round(rsi,1) if rsi is not None else None,"sma20":round(sma20,2),
-        "volatility":round(vola,2) if vola is not None else None,"high90":round(high90pct,2),"history":history,
-        "timestamp":datetime.fromtimestamp(rows[-1][0],timezone.utc).isoformat(),
-        "source":"Yahoo Finance chart data","sourceUrl":f"https://finance.yahoo.com/quote/{quote(ticker)}"
+def score_row(change, mom5, vol_ratio, sma20, rsi):
+    score = 45
+    score += clamp(change * 3.0, -15, 18)
+    score += clamp(mom5 * 1.4, -10, 16)
+    score += clamp((vol_ratio - 1) * 9, -5, 12)
+    score += clamp(sma20 * 0.8, -6, 8)
+    if rsi is not None and rsi > 75:
+        score -= 5
+    if rsi is not None and rsi < 30:
+        score -= 2
+    return round(clamp(score, 0, 100), 1)
+
+
+def yahoo_symbol(lse_code):
+    # Yahoo uses e.g. BP.L / AV.L / BT-A.L for LSE shares.
+    base = lse_code.strip().rstrip(".").replace(".", "-")
+    return base + ".L"
+
+
+def fetch_ftse_all_share_universe():
+    page = get_text(FTSE_ALL_SHARE_URL)
+    marker = "The following shares make up the FTSE All-Share."
+    if marker in page:
+        page = page.split(marker, 1)[1]
+
+    # Constituents link to SharePrice pages with shareprice=<LSE code>.
+    rx = re.compile(r'<a[^>]+href=["\'][^"\']*shareprice=([^&"\']+)[^"\']*["\'][^>]*>(.*?)</a>', re.I | re.S)
+    found = []
+    seen = set()
+    for raw_code, raw_name in rx.findall(page):
+        code = unquote(raw_code).strip().upper()
+        name = html.unescape(re.sub(r"<[^>]+>", "", raw_name)).strip()
+        name = re.sub(r"\s+", " ", name)
+        if not code or code in seen:
+            continue
+        # Ignore obvious non-LSE noise if any appears below the constituent table.
+        if len(code) > 8 or not re.fullmatch(r"[A-Z0-9.]+", code):
+            continue
+        seen.add(code)
+        found.append({"ticker": yahoo_symbol(code), "lseCode": code, "nameHint": name, "market": "UK"})
+
+    if len(found) < 500:
+        raise RuntimeError(f"Only discovered {len(found)} FTSE All-Share constituents")
+
+    # The official LSE overview currently reports 534 constituents. The table is ordered
+    # as a contiguous block, so cap any unrelated links that might appear later in the page.
+    return found[:EXPECTED_CONSTITUENTS]
+
+
+def parse_yahoo_response(response, item):
+    meta = response.get("meta", {})
+    q = ((response.get("indicators", {}).get("quote") or [{}])[0])
+    timestamps = response.get("timestamp") or []
+    closes = q.get("close") or []
+    volumes = q.get("volume") or []
+
+    rows = []
+    for i, ts in enumerate(timestamps):
+        c = closes[i] if i < len(closes) else None
+        v = volumes[i] if i < len(volumes) else 0
+        if c is not None:
+            rows.append((int(ts), float(c), float(v or 0)))
+    if len(rows) < 21:
+        raise RuntimeError("Not enough Yahoo history")
+
+    cs = [r[1] for r in rows]
+    vs = [r[2] for r in rows]
+    price = float(meta.get("regularMarketPrice") or cs[-1])
+    prev = float(cs[-2])
+    change = (price / prev - 1) * 100 if prev else 0
+    mom5 = (price / cs[-6] - 1) * 100 if len(cs) >= 6 and cs[-6] else 0
+    prev_vols = [v for v in vs[-21:-1] if v > 0]
+    avgvol = sum(prev_vols) / len(prev_vols) if prev_vols else 0
+    vr = (vs[-1] / avgvol) if avgvol and vs[-1] else 1
+    sma = sum(cs[-20:]) / 20
+    sma20 = (price / sma - 1) * 100 if sma else 0
+    high90 = max(cs[-66:])  # roughly 90 calendar days of trading sessions
+    high90pct = (price / high90 - 1) * 100 if high90 else 0
+    rsi = rsi14(cs)
+    vola = volatility20(cs)
+    history = [
+        {"date": datetime.fromtimestamp(ts, timezone.utc).strftime("%Y-%m-%d"), "close": round(close, 4)}
+        for ts, close, _ in rows
+    ]
+
+    row = {
+        "ticker": item["ticker"],
+        "lseCode": item["lseCode"],
+        "name": meta.get("longName") or meta.get("shortName") or item.get("nameHint") or item["lseCode"],
+        "market": "UK",
+        "currency": meta.get("currency") or "GBp",
+        "exchange": meta.get("exchangeName") or meta.get("fullExchangeName") or "LSE",
+        "price": round(price, 4),
+        "previousClose": round(prev, 4),
+        "change": round(change, 2),
+        "mom5": round(mom5, 2),
+        "volRatio": round(vr, 2),
+        "rsi": round(rsi, 1) if rsi is not None else None,
+        "sma20": round(sma20, 2),
+        "volatility": round(vola, 2) if vola is not None else None,
+        "high90": round(high90pct, 2),
+        "history": history,
+        "timestamp": datetime.fromtimestamp(rows[-1][0], timezone.utc).isoformat(),
+        "source": "Yahoo Finance chart data",
+        "sourceUrl": f"https://finance.yahoo.com/quote/{quote(item['ticker'])}",
+        "official": {
+            "source": "UK official sources",
+            "lseUrl": "https://www.londonstockexchange.com/",
+            "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"
+        }
     }
+    row["score"] = score_row(row["change"], row["mom5"], row["volRatio"], row["sma20"], row["rsi"])
+    return row
 
-def latest_fact(facts, concepts, unit):
-    us=facts.get("facts",{}).get("us-gaap",{}); rows=[]
-    for c in concepts:
-        for x in us.get(c,{}).get("units",{}).get(unit,[]):
-            if x.get("val") is not None and x.get("filed"):
-                rows.append((x.get("filed"),x.get("end") or "",x.get("val"),c,x.get("form")))
-    if not rows: return None
-    filed,end,val,c,form=sorted(rows,reverse=True)[0]
-    return {"value":val,"filed":filed,"end":end,"form":form,"concept":c}
 
-def sec_company(cik):
-    cik10=f"{cik:010d}"; sub=get_json(f"https://data.sec.gov/submissions/CIK{cik10}.json")
-    rec=sub.get("filings",{}).get("recent",{}); forms=rec.get("form",[]); dates=rec.get("filingDate",[]); accs=rec.get("accessionNumber",[]); docs=rec.get("primaryDocument",[])
-    filing=None
-    for wanted in ("10-Q","10-K","8-K"):
-        for i,form in enumerate(forms):
-            if form==wanted:
-                accession=accs[i].replace("-",""); filing={"form":form,"date":dates[i],"url":f"https://www.sec.gov/Archives/edgar/data/{cik}/{accession}/{docs[i]}"}; break
-        if filing: break
-    facts=get_json(f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik10}.json")
-    return {"source":"SEC EDGAR","sourceUrl":f"https://www.sec.gov/edgar/browse/?CIK={cik}&owner=exclude","latestFiling":filing,
-            "revenue":latest_fact(facts,["RevenueFromContractWithCustomerExcludingAssessedTax","Revenues","SalesRevenueNet"],"USD"),
-            "netIncome":latest_fact(facts,["NetIncomeLoss","ProfitLoss"],"USD"),"assets":latest_fact(facts,["Assets"],"USD"),
-            "liabilities":latest_fact(facts,["Liabilities"],"USD"),"eps":latest_fact(facts,["EarningsPerShareDiluted","EarningsPerShareBasic"],"USD/shares")}
+def fetch_batch(batch):
+    symbols = ",".join(x["ticker"] for x in batch)
+    url = "https://query1.finance.yahoo.com/v7/finance/spark?symbols=" + quote(symbols, safe=",.-") + "&range=1y&interval=1d&indicators=close&includeTimestamps=true&includePrePost=false"
+    data = get_json(url, timeout=50)
+    results = (data.get("spark", {}) or {}).get("result") or []
+    by_symbol = {r.get("symbol"): r for r in results if r.get("symbol")}
+    rows, errors = [], []
+    for item in batch:
+        try:
+            r = by_symbol.get(item["ticker"])
+            response = ((r or {}).get("response") or [None])[0]
+            if not response:
+                raise RuntimeError("No spark response")
+            rows.append(parse_yahoo_response(response, item))
+        except Exception as e:
+            errors.append({"ticker": item["ticker"], "error": str(e)})
+    return rows, errors
+
+
+def fetch_one_chart(item):
+    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(item['ticker'])}?range=1y&interval=1d&includePrePost=false&events=div%2Csplits"
+    data = get_json(url)
+    response = ((data.get("chart", {}) or {}).get("result") or [None])[0]
+    if not response:
+        raise RuntimeError("Yahoo returned no chart result")
+    return parse_yahoo_response(response, item)
+
 
 def main():
-    generated=datetime.now(timezone.utc).isoformat(); stocks=[]; errors=[]
-    for item in SYMBOLS:
-        t=item["ticker"]
-        try:
-            y=yahoo_chart(t); y["market"]=item["market"]
-            y["score"]=score_row(y["change"],y["mom5"],y["volRatio"],y["sma20"],y["rsi"])
-            if item["market"]=="US" and t in CIKS:
-                try: y["official"]=sec_company(CIKS[t])
-                except Exception as e:
-                    y["official"]={"source":"SEC EDGAR unavailable this run","sourceUrl":f"https://www.sec.gov/edgar/browse/?CIK={CIKS[t]}&owner=exclude"}; errors.append({"ticker":t,"source":"SEC","error":str(e)})
-            elif item["market"]=="US":
-                y["official"]={"source":"SEC EDGAR link","sourceUrl":"https://www.sec.gov/edgar/search/"}
-            else:
-                y["official"]={"source":"UK official sources","lseUrl":"https://www.londonstockexchange.com/","companiesHouseUrl":"https://find-and-update.company-information.service.gov.uk/"}
-            stocks.append(y)
-        except Exception as e:
-            errors.append({"ticker":t,"source":"Yahoo","error":str(e)})
-        time.sleep(0.22)
-    stocks.sort(key=lambda x:x.get("score",0),reverse=True)
-    payload={"generatedAt":generated,"keyless":True,"universeSize":len(SYMBOLS),"providers":[
-        {"name":"Yahoo Finance","type":"market prices/history","authentication":"none","note":"Unofficial endpoint; may change or rate-limit."},
-        {"name":"SEC EDGAR","type":"US primary filings/XBRL facts","authentication":"none","note":"Official SEC public data."}],"stocks":stocks,"errors":errors}
-    os.makedirs(os.path.dirname(OUT),exist_ok=True)
-    with open(OUT,"w",encoding="utf-8") as f: json.dump(payload,f,indent=2,ensure_ascii=False)
-    print(f"wrote {len(stocks)} of {len(SYMBOLS)} stocks, {len(errors)} errors")
+    generated = datetime.now(timezone.utc).isoformat()
+    universe = fetch_ftse_all_share_universe()
+    stocks, errors = [], []
 
-if __name__=="__main__": main()
+    for pos in range(0, len(universe), BATCH_SIZE):
+        batch = universe[pos:pos + BATCH_SIZE]
+        try:
+            rows, batch_errors = fetch_batch(batch)
+            stocks.extend(rows)
+            errors.extend(batch_errors)
+        except Exception as e:
+            errors.append({"batch": pos // BATCH_SIZE + 1, "error": f"spark batch failed: {e}"})
+            # Slow fallback means one failed batch does not invalidate the whole scan.
+            for item in batch:
+                try:
+                    stocks.append(fetch_one_chart(item))
+                except Exception as inner:
+                    errors.append({"ticker": item["ticker"], "error": str(inner)})
+                time.sleep(0.08)
+        time.sleep(0.15)
+
+    stocks.sort(key=lambda x: (x.get("score", 0), x.get("change", 0)), reverse=True)
+    top = stocks[:TOP_N]
+    for i, row in enumerate(top, 1):
+        row["rank"] = i
+
+    payload = {
+        "generatedAt": generated,
+        "universe": "FTSE All-Share",
+        "universeSource": FTSE_ALL_SHARE_URL,
+        "universeSize": len(universe),
+        "analysedCount": len(stocks),
+        "displayCount": len(top),
+        "ranking": "Radar score descending",
+        "stocks": top,
+        "errors": errors[-100:]
+    }
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
+    with open(OUT, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, ensure_ascii=False)
+    print(f"analysed {len(stocks)} of {len(universe)} FTSE All-Share constituents; published top {len(top)}; {len(errors)} errors")
+
+
+if __name__ == "__main__":
+    main()
