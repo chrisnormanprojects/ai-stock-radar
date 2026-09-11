@@ -1,4 +1,4 @@
-const CACHE = "ai-stock-radar-v1";
+const CACHE = "ai-stock-radar-v2";
 const ASSETS = [
   "./",
   "./index.html",
