@@ -1,111 +1,31 @@
 # AI Stock Radar
 
-A mobile-first stock research app for momentum, unusual volume, news catalysts, watchlists and paper trading.
+A mobile-first UK share research scanner. Scores are momentum heuristics, not forecasts or investment advice. No API key is required.
 
-## Important
-This app is a research tool, not financial advice and not an automated trading system.
+## Data and coverage
 
-A high score does **not** mean a share will rise.
+The updater reads **every page** of Hargreaves Lansdown's FTSE All-Share constituent table, matching only labelled stock rows. It checks uniqueness, core members, pagination and large membership changes. This is provider-listed coverage, not independently certified FTSE Russell membership. Source and exclusions are visible in the app.
 
-## Files
-- `index.html` — the app
-- `manifest.webmanifest` — installable web-app settings
-- `service-worker.js` — offline shell/cache support
-- `assets/` — app icons
+Yahoo Finance daily charts supply prices and volume. Each quote must match the latest FTSE 100 trading session and have at least 66 valid daily bars, a current quote timestamp and consistent price units. Suspicious quote/history discrepancies and large discontinuities are quarantined, not automatically rescaled. All calculations use the same price series. Zero volume is not replaced by average volume; flat-price RSI is neutral.
 
-## Put it on GitHub Pages
+The snapshot retains all validated shares and their histories, plus the complete discovered membership and exclusion reasons. Radar defaults to 30; search, Movers, watchlists and paper positions use the full snapshot. Missing quotes are explicit. Legacy paper entries with unverified currency do not show invented returns.
 
-1. Create a new GitHub repository, for example:
-   `ai-stock-radar`
+A snapshot is published only when at least 90% of discovered members pass validation. Partial coverage is labelled, with every exclusion listed. If validation fails, the previous snapshot is retained and `data/status.json` reports failure. The interface warns about cached snapshots and snapshots older than six hours. Daily bars are not real-time prices.
 
-2. Make the repository **Public**.
+## Updates and deployment
 
-3. Upload **all the files and the `assets` folder** from this package into the root of the repository.
+`.github/workflows/update-market-data.yml` requests an update at minute 17 of every hour Monday–Friday (UTC), on generator/test changes, or manually. GitHub may delay scheduled jobs. Runs are serialized. Tests precede retrieval and failed retrieval still commits health status, then marks the run failed. Monitor the Actions tab and the site's freshness banner; the schedule is not a timing guarantee.
 
-Your repository should look like:
+GitHub Pages serves `main` at `/`. The offline shell is network-first for navigation; data is never replaced by HTML. Cached summaries omit histories to stay within mobile storage limits. Storage failure does not prevent fresh results from displaying.
 
-```text
-ai-stock-radar/
-├── index.html
-├── manifest.webmanifest
-├── service-worker.js
-├── README.md
-└── assets/
-    ├── icon-180.png
-    ├── icon-192.png
-    └── icon-512.png
+Open the site in iPhone Safari and use Share → Add to Home Screen. Icons are in `assets/`.
+
+## Development
+
+```sh
+python -m unittest discover -s tests -v
+node tests/test-ui.cjs
+python scripts/fetch_market_data.py
 ```
 
-4. Open the repository's:
-   **Settings → Pages**
-
-5. Under **Build and deployment** choose:
-   **Deploy from a branch**
-
-6. Select:
-   - Branch: `main`
-   - Folder: `/ (root)`
-
-7. Press **Save**.
-
-Your site will normally appear at:
-
-```text
-https://YOUR-USERNAME.github.io/ai-stock-radar/
-```
-
-## Install it on iPhone
-
-After GitHub Pages is live:
-
-1. Open the website in **Safari**.
-2. Tap **Share**.
-3. Tap **Add to Home Screen**.
-4. Tap **Add**.
-
-It will then launch much more like a normal iPhone app.
-
-## Live stock data
-
-The app can use an Alpha Vantage API key.
-
-Open:
-
-**Settings → Alpha Vantage API key**
-
-Paste your key and save it.
-
-The key is stored in that browser's local storage.
-
-### Security
-Do **not** paste an OpenAI API key directly into `index.html`, JavaScript, GitHub, or any other public client-side file.
-
-If ChatGPT/OpenAI analysis is added later, it should go through a secure server-side or serverless function.
-
-## Current features
-
-- Stock radar scoring
-- Top opportunities list
-- Early movers
-- News catalyst view
-- Watchlist
-- Paper trading
-- US/UK filtering
-- Mobile-first/iPhone interface
-- Installable PWA
-- Offline app shell
-
-## Suggested next version
-
-A production-quality v2 should add:
-
-- proper UK market discovery
-- charts
-- RSI / MACD / moving averages
-- unusual-volume alerts
-- signal history
-- automated outcome tracking after 1 hour / 1 day / 5 days / 20 days
-- backtesting
-- a secure OpenAI analysis endpoint
-- push notifications for high-scoring signals
-
+The generator uses the Python standard library only. Tests use synthetic fixtures and do not contact providers. Live refresh uses provider access and may exclude stale, discontinued or recently listed shares.

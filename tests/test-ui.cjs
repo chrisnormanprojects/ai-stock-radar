@@ -1,0 +1,20 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),path=require('node:path');
+const html=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');
+const js=html.match(/<script>([\s\S]*?)<\/script>/)[1].replace('});loadData();','});');
+const elements=new Map();
+function element(id){if(!elements.has(id))elements.set(id,{value:'',textContent:'',innerHTML:'',style:{},classList:{add(){},remove(){}}});return elements.get(id)}
+let quota=false;
+const context=vm.createContext({document:{getElementById:element,querySelectorAll:()=>[]},localStorage:{getItem:()=>'{broken json',setItem:()=>{if(quota)throw Error('quota')}},setInterval(){},Date,console,fetch:async()=>({ok:true,json:async()=>data})});
+vm.runInContext(js,context);
+const data={schemaVersion:2,generatedAt:new Date().toISOString(),marketSession:'2026-09-15',analysedCount:40,universeSize:40,displayCount:30,excludedCount:0,errors:[],stocks:Array.from({length:40},(_,i)=>({ticker:`T${i}.L`,name:`Company ${i}`,price:100,score:90-i,change:i/10,currency:'GBp',sessionDate:'2026-09-15',history:[{date:'2026-09-15',close:100}]}))};
+context.input=data;
+vm.runInContext('dataset=input;stocks=input.stocks;render()',context);
+assert.equal((element('radarList').innerHTML.match(/class="stock-row"/g)||[]).length,30);
+element('search').value='T39.L';vm.runInContext('render()',context);
+assert.match(element('radarList').innerHTML,/Company 39/);
+vm.runInContext("watch=new Set(['T39.L','MISSING.L']);render()",context);
+assert.match(element('watchList').innerHTML,/Company 39/);
+assert.match(element('watchList').innerHTML,/No validated quote/);
+vm.runInContext("papers=[{ticker:'MISSING.L',entry:100,currency:'GBp'},{ticker:'T1.L',entry:100}];renderPaper()",context);
+assert.equal((element('paperList').innerHTML.match(/P\/L unavailable/g)||[]).length,2);
+(async()=>{quota=true;await vm.runInContext('loadData(true)',context);assert.match(element('freshness').textContent,/Updated/);assert.equal(vm.runInContext('stocks.length',context),40);assert.equal(vm.runInContext('validDataset({stocks:[{}]})',context),false);console.log('UI regression checks passed: full search/watch, missing returns, corrupt storage and quota failures.');})().catch(e=>{console.error(e);process.exitCode=1});

@@ -1,41 +1,52 @@
 name: Update market data
-
 on:
   workflow_dispatch:
   push:
     paths:
-      - 'scripts/fetch_market_data.py'
+      - 'scripts/**'
+      - 'tests/**'
       - '.github/workflows/update-market-data.yml'
   schedule:
-    - cron: '17 */2 * * 1-5'
-
+    - cron: '17 * * * 1-5'
 permissions:
   contents: write
-
+concurrency:
+  group: market-data-refresh
+  cancel-in-progress: false
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
-      - name: Fetch public market and filing data
+      - name: Regression tests
+        run: |
+          python -m unittest discover -s tests -v
+          node tests/test-ui.cjs
+      - name: Fetch and validate market data
+        id: fetch
+        continue-on-error: true
         run: python scripts/fetch_market_data.py
-
-      - name: Commit refreshed dataset
+      - name: Publish snapshot or failure status
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/market.json
-          if git diff --cached --quiet; then
-            echo "No data changes"
-          else
-            git commit -m "Refresh market dataset"
+          git add data/market.json data/status.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh validated market data and health status"
+            git pull --rebase origin main
             git push
           fi
+      - name: Refresh summary
+        if: always()
+        run: |
+          if [ -f data/status.json ]; then
+            echo '### Market data health' >> "$GITHUB_STEP_SUMMARY"
+            cat data/status.json >> "$GITHUB_STEP_SUMMARY"
+          fi
+      - name: Report failed validation
+        if: steps.fetch.outcome == 'failure'
+        run: exit 1
