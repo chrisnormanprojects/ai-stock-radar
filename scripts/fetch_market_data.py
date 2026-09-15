@@ -5,7 +5,7 @@ from urllib.parse import quote, unquote
 from urllib.request import Request, urlopen
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "data", "market.json")
-UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 AIStockRadar/3.0"
+UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 AIStockRadar/3.1"
 FTSE_ALL_SHARE_URL = "https://www.lse.co.uk/indices/ftse-all-share/constituents.html"
 EXPECTED_CONSTITUENTS = 534
 TOP_N = 30
@@ -64,7 +64,6 @@ def score_row(change, mom5, vol_ratio, sma20, rsi):
 
 
 def yahoo_symbol(lse_code):
-    # Yahoo uses e.g. BP.L / AV.L / BT-A.L for LSE shares.
     base = lse_code.strip().rstrip(".").replace(".", "-")
     return base + ".L"
 
@@ -75,7 +74,6 @@ def fetch_ftse_all_share_universe():
     if marker in page:
         page = page.split(marker, 1)[1]
 
-    # Constituents link to SharePrice pages with shareprice=<LSE code>.
     rx = re.compile(r'<a[^>]+href=["\'][^"\']*shareprice=([^&"\']+)[^"\']*["\'][^>]*>(.*?)</a>', re.I | re.S)
     found = []
     seen = set()
@@ -85,7 +83,6 @@ def fetch_ftse_all_share_universe():
         name = re.sub(r"\s+", " ", name)
         if not code or code in seen:
             continue
-        # Ignore obvious non-LSE noise if any appears below the constituent table.
         if len(code) > 8 or not re.fullmatch(r"[A-Z0-9.]+", code):
             continue
         seen.add(code)
@@ -93,9 +90,6 @@ def fetch_ftse_all_share_universe():
 
     if len(found) < 500:
         raise RuntimeError(f"Only discovered {len(found)} FTSE All-Share constituents")
-
-    # The official LSE overview currently reports 534 constituents. The table is ordered
-    # as a contiguous block, so cap any unrelated links that might appear later in the page.
     return found[:EXPECTED_CONSTITUENTS]
 
 
@@ -126,7 +120,7 @@ def parse_yahoo_response(response, item):
     vr = (vs[-1] / avgvol) if avgvol and vs[-1] else 1
     sma = sum(cs[-20:]) / 20
     sma20 = (price / sma - 1) * 100 if sma else 0
-    high90 = max(cs[-66:])  # roughly 90 calendar days of trading sessions
+    high90 = max(cs[-66:])
     high90pct = (price / high90 - 1) * 100 if high90 else 0
     rsi = rsi14(cs)
     vola = volatility20(cs)
@@ -165,25 +159,6 @@ def parse_yahoo_response(response, item):
     return row
 
 
-def fetch_batch(batch):
-    symbols = ",".join(x["ticker"] for x in batch)
-    url = "https://query1.finance.yahoo.com/v7/finance/spark?symbols=" + quote(symbols, safe=",.-") + "&range=1y&interval=1d&indicators=close&includeTimestamps=true&includePrePost=false"
-    data = get_json(url, timeout=50)
-    results = (data.get("spark", {}) or {}).get("result") or []
-    by_symbol = {r.get("symbol"): r for r in results if r.get("symbol")}
-    rows, errors = [], []
-    for item in batch:
-        try:
-            r = by_symbol.get(item["ticker"])
-            response = ((r or {}).get("response") or [None])[0]
-            if not response:
-                raise RuntimeError("No spark response")
-            rows.append(parse_yahoo_response(response, item))
-        except Exception as e:
-            errors.append({"ticker": item["ticker"], "error": str(e)})
-    return rows, errors
-
-
 def fetch_one_chart(item):
     url = f"https://query1.finance.yahoo.com/v8/finance/chart/{quote(item['ticker'])}?range=1y&interval=1d&includePrePost=false&events=div%2Csplits"
     data = get_json(url)
@@ -191,6 +166,46 @@ def fetch_one_chart(item):
     if not response:
         raise RuntimeError("Yahoo returned no chart result")
     return parse_yahoo_response(response, item)
+
+
+def retry_one_chart(item, attempts=3):
+    last_error = None
+    for attempt in range(attempts):
+        try:
+            return fetch_one_chart(item), None
+        except Exception as e:
+            last_error = e
+            if attempt + 1 < attempts:
+                time.sleep(0.35 * (attempt + 1))
+    return None, {"ticker": item["ticker"], "error": f"individual retry failed: {last_error}"}
+
+
+def fetch_batch(batch):
+    symbols = ",".join(x["ticker"] for x in batch)
+    url = "https://query1.finance.yahoo.com/v7/finance/spark?symbols=" + quote(symbols, safe=",.-") + "&range=1y&interval=1d&indicators=close&includeTimestamps=true&includePrePost=false"
+    data = get_json(url, timeout=50)
+    results = (data.get("spark", {}) or {}).get("result") or []
+    by_symbol = {r.get("symbol"): r for r in results if r.get("symbol")}
+    rows, errors = [], []
+
+    for item in batch:
+        try:
+            r = by_symbol.get(item["ticker"])
+            response = ((r or {}).get("response") or [None])[0]
+            if not response:
+                raise RuntimeError("No spark response")
+            rows.append(parse_yahoo_response(response, item))
+        except Exception:
+            # Yahoo's spark endpoint can return a successful but incomplete batch.
+            # Retry every missing/invalid constituent through the chart endpoint so
+            # the published Top 30 is based on the full universe whenever possible.
+            row, error = retry_one_chart(item)
+            if row is not None:
+                rows.append(row)
+            elif error is not None:
+                errors.append(error)
+            time.sleep(0.08)
+    return rows, errors
 
 
 def main():
@@ -206,12 +221,12 @@ def main():
             errors.extend(batch_errors)
         except Exception as e:
             errors.append({"batch": pos // BATCH_SIZE + 1, "error": f"spark batch failed: {e}"})
-            # Slow fallback means one failed batch does not invalidate the whole scan.
             for item in batch:
-                try:
-                    stocks.append(fetch_one_chart(item))
-                except Exception as inner:
-                    errors.append({"ticker": item["ticker"], "error": str(inner)})
+                row, error = retry_one_chart(item)
+                if row is not None:
+                    stocks.append(row)
+                elif error is not None:
+                    errors.append(error)
                 time.sleep(0.08)
         time.sleep(0.15)
 
