@@ -5,9 +5,10 @@ from urllib.parse import quote, unquote
 from urllib.request import Request, urlopen
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "data", "market.json")
-UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 AIStockRadar/3.1"
+UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 AIStockRadar/3.2"
 FTSE_ALL_SHARE_URL = "https://www.lse.co.uk/indices/ftse-all-share/constituents.html"
-EXPECTED_CONSTITUENTS = 534
+MIN_CONSTITUENTS = 450
+MAX_CONSTITUENTS = 600
 TOP_N = 30
 BATCH_SIZE = 35
 
@@ -74,6 +75,9 @@ def fetch_ftse_all_share_universe():
     if marker in page:
         page = page.split(marker, 1)[1]
 
+    # Parse constituent share-price links rather than assuming a fixed index size.
+    # FTSE All-Share membership changes over time, so a hard-coded count can make
+    # an otherwise healthy refresh fail after index reviews or source-page changes.
     rx = re.compile(r'<a[^>]+href=["\'][^"\']*shareprice=([^&"\']+)[^"\']*["\'][^>]*>(.*?)</a>', re.I | re.S)
     found = []
     seen = set()
@@ -88,9 +92,14 @@ def fetch_ftse_all_share_universe():
         seen.add(code)
         found.append({"ticker": yahoo_symbol(code), "lseCode": code, "nameHint": name, "market": "UK"})
 
-    if len(found) < 500:
-        raise RuntimeError(f"Only discovered {len(found)} FTSE All-Share constituents")
-    return found[:EXPECTED_CONSTITUENTS]
+    # Keep a broad sanity window: reject a clearly broken/partial page, but accept
+    # legitimate constituent-count changes instead of pretending the index is 534.
+    if len(found) < MIN_CONSTITUENTS:
+        raise RuntimeError(f"Constituent discovery looks incomplete: only {len(found)} found (minimum {MIN_CONSTITUENTS})")
+    if len(found) > MAX_CONSTITUENTS:
+        raise RuntimeError(f"Constituent discovery looks contaminated: {len(found)} found (maximum {MAX_CONSTITUENTS})")
+    print(f"discovered {len(found)} current FTSE All-Share constituents")
+    return found
 
 
 def parse_yahoo_response(response, item):
@@ -99,7 +108,6 @@ def parse_yahoo_response(response, item):
     timestamps = response.get("timestamp") or []
     closes = q.get("close") or []
     volumes = q.get("volume") or []
-
     rows = []
     for i, ts in enumerate(timestamps):
         c = closes[i] if i < len(closes) else None
@@ -108,7 +116,6 @@ def parse_yahoo_response(response, item):
             rows.append((int(ts), float(c), float(v or 0)))
     if len(rows) < 21:
         raise RuntimeError("Not enough Yahoo history")
-
     cs = [r[1] for r in rows]
     vs = [r[2] for r in rows]
     price = float(meta.get("regularMarketPrice") or cs[-1])
@@ -124,36 +131,19 @@ def parse_yahoo_response(response, item):
     high90pct = (price / high90 - 1) * 100 if high90 else 0
     rsi = rsi14(cs)
     vola = volatility20(cs)
-    history = [
-        {"date": datetime.fromtimestamp(ts, timezone.utc).strftime("%Y-%m-%d"), "close": round(close, 4)}
-        for ts, close, _ in rows
-    ]
-
+    history = [{"date": datetime.fromtimestamp(ts, timezone.utc).strftime("%Y-%m-%d"), "close": round(close, 4)} for ts, close, _ in rows]
     row = {
-        "ticker": item["ticker"],
-        "lseCode": item["lseCode"],
+        "ticker": item["ticker"], "lseCode": item["lseCode"],
         "name": meta.get("longName") or meta.get("shortName") or item.get("nameHint") or item["lseCode"],
-        "market": "UK",
-        "currency": meta.get("currency") or "GBp",
+        "market": "UK", "currency": meta.get("currency") or "GBp",
         "exchange": meta.get("exchangeName") or meta.get("fullExchangeName") or "LSE",
-        "price": round(price, 4),
-        "previousClose": round(prev, 4),
-        "change": round(change, 2),
-        "mom5": round(mom5, 2),
-        "volRatio": round(vr, 2),
-        "rsi": round(rsi, 1) if rsi is not None else None,
-        "sma20": round(sma20, 2),
-        "volatility": round(vola, 2) if vola is not None else None,
-        "high90": round(high90pct, 2),
-        "history": history,
+        "price": round(price, 4), "previousClose": round(prev, 4), "change": round(change, 2),
+        "mom5": round(mom5, 2), "volRatio": round(vr, 2), "rsi": round(rsi, 1) if rsi is not None else None,
+        "sma20": round(sma20, 2), "volatility": round(vola, 2) if vola is not None else None,
+        "high90": round(high90pct, 2), "history": history,
         "timestamp": datetime.fromtimestamp(rows[-1][0], timezone.utc).isoformat(),
-        "source": "Yahoo Finance chart data",
-        "sourceUrl": f"https://finance.yahoo.com/quote/{quote(item['ticker'])}",
-        "official": {
-            "source": "UK official sources",
-            "lseUrl": "https://www.londonstockexchange.com/",
-            "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"
-        }
+        "source": "Yahoo Finance chart data", "sourceUrl": f"https://finance.yahoo.com/quote/{quote(item['ticker'])}",
+        "official": {"source": "UK official sources", "lseUrl": "https://www.londonstockexchange.com/", "companiesHouseUrl": "https://find-and-update.company-information.service.gov.uk/"}
     }
     row["score"] = score_row(row["change"], row["mom5"], row["volRatio"], row["sma20"], row["rsi"])
     return row
@@ -187,7 +177,6 @@ def fetch_batch(batch):
     results = (data.get("spark", {}) or {}).get("result") or []
     by_symbol = {r.get("symbol"): r for r in results if r.get("symbol")}
     rows, errors = [], []
-
     for item in batch:
         try:
             r = by_symbol.get(item["ticker"])
@@ -196,9 +185,6 @@ def fetch_batch(batch):
                 raise RuntimeError("No spark response")
             rows.append(parse_yahoo_response(response, item))
         except Exception:
-            # Yahoo's spark endpoint can return a successful but incomplete batch.
-            # Retry every missing/invalid constituent through the chart endpoint so
-            # the published Top 30 is based on the full universe whenever possible.
             row, error = retry_one_chart(item)
             if row is not None:
                 rows.append(row)
@@ -212,7 +198,6 @@ def main():
     generated = datetime.now(timezone.utc).isoformat()
     universe = fetch_ftse_all_share_universe()
     stocks, errors = [], []
-
     for pos in range(0, len(universe), BATCH_SIZE):
         batch = universe[pos:pos + BATCH_SIZE]
         try:
@@ -229,22 +214,14 @@ def main():
                     errors.append(error)
                 time.sleep(0.08)
         time.sleep(0.15)
-
     stocks.sort(key=lambda x: (x.get("score", 0), x.get("change", 0)), reverse=True)
     top = stocks[:TOP_N]
     for i, row in enumerate(top, 1):
         row["rank"] = i
-
     payload = {
-        "generatedAt": generated,
-        "universe": "FTSE All-Share",
-        "universeSource": FTSE_ALL_SHARE_URL,
-        "universeSize": len(universe),
-        "analysedCount": len(stocks),
-        "displayCount": len(top),
-        "ranking": "Radar score descending",
-        "stocks": top,
-        "errors": errors[-100:]
+        "generatedAt": generated, "universe": "FTSE All-Share", "universeSource": FTSE_ALL_SHARE_URL,
+        "universeSize": len(universe), "analysedCount": len(stocks), "displayCount": len(top),
+        "ranking": "Radar score descending", "stocks": top, "errors": errors[-100:]
     }
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
     with open(OUT, "w", encoding="utf-8") as f:
