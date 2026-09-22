@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-22T17:00:06.720315+00:00",
+  "generatedAt": "2026-09-22T21:22:54.005743+00:00",
   "universe": "FTSE All-Share",
   "universeSource": "https://www.lse.co.uk/indices/ftse-all-share/constituents.html",
   "universeCrossCheckSources": [
@@ -26494,7 +26494,7 @@
     {
       "ticker": "THRL.L",
       "lseCode": "THRL",
-      "name": "Target Healthcare REIT PLC",
+      "name": "Target Healthcare REIT Ord",
       "market": "UK",
       "currency": "GBp",
       "exchange": "LSE",
@@ -28584,7 +28584,7 @@
     {
       "ticker": "FCSS.L",
       "lseCode": "FCSS",
-      "name": "Fidelity China Special Situations Plc",
+      "name": "Fidelity China Special Situations Ord",
       "market": "UK",
       "currency": "GBp",
       "exchange": "LSE",
@@ -29629,7 +29629,7 @@
     {
       "ticker": "VSL.L",
       "lseCode": "VSL",
-      "name": "Vpc Specialty Lending Investments Plc",
+      "name": "VPC Specialty Lending Investments Ord",
       "market": "UK",
       "currency": "GBp",
       "exchange": "LSE",
