@@ -12,9 +12,14 @@ FTSE_COMPONENT_URLS = [
     "https://www.lse.co.uk/indices/ftse-250/constituents.html",
     "https://www.lse.co.uk/indices/ftse-small-cap/constituents.html",
 ]
-OFFICIAL_EXPECTED_CONSTITUENTS = 534
+OFFICIAL_EXPECTED_CONSTITUENTS = 536
 TOP_N = 30
-BATCH_SIZE = 35
+# Yahoo's spark endpoint currently rejects requests containing more than 20
+# symbols.  Larger batches silently forced the whole refresh into individual
+# retries, making the scheduled job slow and much less reliable.
+BATCH_SIZE = 20
+MIN_UNIVERSE_COVERAGE = 0.99
+MIN_ANALYSED_COVERAGE = 0.97
 
 
 def get_text(url, timeout=35):
@@ -94,8 +99,12 @@ def fetch_ftse_all_share_universe():
     for code, row in component.items(): merged.setdefault(code, row)
     found = list(merged.values())
     print(f"constituent discovery: all-share page={len(primary)}, components={component_counts}, union={len(found)}, official reference={OFFICIAL_EXPECTED_CONSTITUENTS}")
-    if len(found) < 500 or len(found) > 575:
-        raise RuntimeError(f"Constituent discovery outside safe range: {len(found)}")
+    minimum = int(OFFICIAL_EXPECTED_CONSTITUENTS * MIN_UNIVERSE_COVERAGE)
+    if len(found) < minimum or len(found) > 575:
+        raise RuntimeError(
+            f"Constituent discovery incomplete: found {len(found)}, need at least {minimum} "
+            f"of the official reference {OFFICIAL_EXPECTED_CONSTITUENTS}"
+        )
     return found
 
 
@@ -110,7 +119,18 @@ def parse_yahoo_response(response, item):
         if c is not None: rows.append((int(ts), float(c), float(v or 0)))
     if len(rows) < 21: raise RuntimeError("Not enough Yahoo history")
     cs, vs = [r[1] for r in rows], [r[2] for r in rows]
-    price, prev = float(meta.get("regularMarketPrice") or cs[-1]), float(cs[-2])
+    # Yahoo occasionally returns an LSE regularMarketPrice in a different
+    # unit from its chart series (e.g. HEAD.L: 10.5 versus 0.105 GBp).  Only
+    # correct exact powers-of-ten mismatches; legitimate large daily moves
+    # must remain untouched.
+    last_close = float(cs[-1])
+    raw_price = float(meta.get("regularMarketPrice") or last_close)
+    ratio = raw_price / last_close if last_close else 1
+    for factor in (1000, 100, 10, 0.1, 0.01, 0.001):
+        if abs(ratio - factor) / factor < 0.001:
+            raw_price /= factor
+            break
+    price, prev = raw_price, float(cs[-2])
     change = (price / prev - 1) * 100 if prev else 0
     mom5 = (price / cs[-6] - 1) * 100 if len(cs) >= 6 and cs[-6] else 0
     prev_vols = [v for v in vs[-21:-1] if v > 0]
@@ -179,6 +199,12 @@ def main():
                 time.sleep(0.08)
         time.sleep(0.15)
     stocks.sort(key=lambda x: (x.get("score", 0), x.get("change", 0)), reverse=True)
+    minimum_analysed = int(len(universe) * MIN_ANALYSED_COVERAGE)
+    if len(stocks) < minimum_analysed:
+        raise RuntimeError(
+            f"Quote coverage incomplete: analysed {len(stocks)} of {len(universe)}; "
+            f"need at least {minimum_analysed}. Refusing to publish a partial scan."
+        )
     top = stocks[:TOP_N]
     for i, row in enumerate(top, 1): row["rank"] = i
     payload = {"generatedAt": generated, "universe": "FTSE All-Share", "universeSource": FTSE_ALL_SHARE_URL, "universeCrossCheckSources": FTSE_COMPONENT_URLS, "officialReferenceCount": OFFICIAL_EXPECTED_CONSTITUENTS, "universeSize": len(universe), "analysedCount": len(stocks), "displayCount": len(top), "ranking": "Radar score descending", "stocks": top, "errors": errors[-100:]}
