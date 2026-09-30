@@ -12,24 +12,66 @@ FTSE_COMPONENT_URLS = [
     "https://www.lse.co.uk/indices/ftse-250/constituents.html",
     "https://www.lse.co.uk/indices/ftse-small-cap/constituents.html",
 ]
-OFFICIAL_EXPECTED_CONSTITUENTS = 536
+OFFICIAL_INDEX_URL = "https://www.londonstockexchange.com/indices/ftse-all-share"
 TOP_N = 30
 # Yahoo's spark endpoint currently rejects requests containing more than 20
-# symbols.  Larger batches silently forced the whole refresh into individual
-# retries, making the scheduled job slow and much less reliable.
+# symbols. Larger batches silently force the refresh into individual retries.
 BATCH_SIZE = 20
-MIN_UNIVERSE_COVERAGE = 0.99
+# A stale exact constituent count caused every refresh to fail after the
+# September 2026 index review. Use layered, change-aware quality gates instead.
+MIN_ABSOLUTE_UNIVERSE = 450
+MAX_ABSOLUTE_UNIVERSE = 650
+MAX_UNIVERSE_DROP_FROM_LAST_GOOD = 0.08
+MAX_UNIVERSE_GROWTH_FROM_LAST_GOOD = 0.12
 MIN_ANALYSED_COVERAGE = 0.97
+MIN_OFFICIAL_COVERAGE = 0.90
+WARN_OFFICIAL_COVERAGE = 0.97
 
 
-def get_text(url, timeout=35):
-    req = Request(url, headers={"User-Agent": UA, "Accept": "text/html,application/xhtml+xml,application/json"})
-    with urlopen(req, timeout=timeout) as r:
-        return r.read().decode("utf-8", errors="replace")
+def get_text(url, timeout=35, attempts=3):
+    last_error = None
+    for attempt in range(attempts):
+        try:
+            req = Request(url, headers={"User-Agent": UA, "Accept": "text/html,application/xhtml+xml,application/json"})
+            with urlopen(req, timeout=timeout) as r:
+                return r.read().decode("utf-8", errors="replace")
+        except Exception as e:
+            last_error = e
+            if attempt + 1 < attempts:
+                time.sleep(0.75 * (2 ** attempt))
+    raise RuntimeError(f"HTTP fetch failed after {attempts} attempts for {url}: {last_error}")
 
 
 def get_json(url, timeout=35):
     return json.loads(get_text(url, timeout=timeout))
+
+
+def load_previous_dataset():
+    try:
+        with open(OUT, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data if isinstance(data, dict) else {}
+    except Exception:
+        return {}
+
+
+def fetch_official_reference_count():
+    # This is a reference/diagnostic only. The official count changes at
+    # quarterly reviews, so it must never be a hard-coded publish threshold.
+    try:
+        page = get_text(OFFICIAL_INDEX_URL, timeout=30, attempts=2)
+        flat = re.sub(r"\s+", " ", html.unescape(page))
+        patterns = [
+            r"Number of constituents.{0,250}?([4-6][0-9]{2})",
+            r"numberOfConstituents[^0-9]{0,80}([4-6][0-9]{2})",
+        ]
+        for pattern in patterns:
+            m = re.search(pattern, flat, re.I | re.S)
+            if m:
+                return int(m.group(1))
+    except Exception as e:
+        print(f"warning: official constituent reference unavailable: {e}")
+    return None
 
 
 def clamp(n, a, b):
@@ -83,29 +125,76 @@ def parse_constituent_page(page):
     return found
 
 
-def fetch_ftse_all_share_universe():
+def fetch_ftse_all_share_universe(previous_size=None, official_count=None):
     primary = parse_constituent_page(get_text(FTSE_ALL_SHARE_URL))
     component = {}
     component_counts = []
     for url in FTSE_COMPONENT_URLS:
         rows = parse_constituent_page(get_text(url))
         component_counts.append(len(rows))
-        for row in rows: component[row["lseCode"]] = row
+        for row in rows:
+            component[row["lseCode"]] = row
 
     merged = {row["lseCode"]: row for row in primary}
-    # FTSE All-Share is the aggregation of FTSE 100, FTSE 250 and FTSE SmallCap.
-    # Cross-checking those pages recovers constituents omitted by a truncated
-    # All-Share page while retaining the direct page as the primary source.
-    for code, row in component.items(): merged.setdefault(code, row)
+    # FTSE All-Share is built from the FTSE 100, FTSE 250 and FTSE SmallCap.
+    # Keep the direct All-Share page primary, but merge component pages so a
+    # temporarily truncated page does not silently remove a constituent.
+    for code, row in component.items():
+        merged.setdefault(code, row)
     found = list(merged.values())
-    print(f"constituent discovery: all-share page={len(primary)}, components={component_counts}, union={len(found)}, official reference={OFFICIAL_EXPECTED_CONSTITUENTS}")
-    minimum = int(OFFICIAL_EXPECTED_CONSTITUENTS * MIN_UNIVERSE_COVERAGE)
-    if len(found) < minimum or len(found) > 575:
+    current_size = len(found)
+    official_text = official_count if official_count else "unavailable"
+    print(
+        f"constituent discovery: all-share page={len(primary)}, "
+        f"components={component_counts}, union={current_size}, "
+        f"previous={previous_size or 'none'}, official reference={official_text}"
+    )
+
+    if current_size < MIN_ABSOLUTE_UNIVERSE or current_size > MAX_ABSOLUTE_UNIVERSE:
         raise RuntimeError(
-            f"Constituent discovery incomplete: found {len(found)}, need at least {minimum} "
-            f"of the official reference {OFFICIAL_EXPECTED_CONSTITUENTS}"
+            f"Constituent discovery outside broad safety range: {current_size} "
+            f"(expected {MIN_ABSOLUTE_UNIVERSE}-{MAX_ABSOLUTE_UNIVERSE})"
         )
-    return found
+
+    if previous_size:
+        min_from_previous = int(previous_size * (1 - MAX_UNIVERSE_DROP_FROM_LAST_GOOD))
+        max_from_previous = int(previous_size * (1 + MAX_UNIVERSE_GROWTH_FROM_LAST_GOOD) + 0.999)
+        if current_size < min_from_previous:
+            raise RuntimeError(
+                f"Constituent discovery dropped unexpectedly: {current_size} vs previous "
+                f"{previous_size}; minimum allowed is {min_from_previous}"
+            )
+        if current_size > max_from_previous:
+            raise RuntimeError(
+                f"Constituent discovery grew unexpectedly: {current_size} vs previous "
+                f"{previous_size}; maximum allowed is {max_from_previous}"
+            )
+
+    warnings = []
+    official_coverage = None
+    if official_count:
+        official_coverage = current_size / official_count
+        if official_coverage < MIN_OFFICIAL_COVERAGE:
+            raise RuntimeError(
+                f"Constituent source coverage too low: {current_size}/{official_count} "
+                f"({official_coverage:.1%})"
+            )
+        if official_coverage < WARN_OFFICIAL_COVERAGE:
+            warnings.append(
+                f"Public constituent source exposes {current_size}/{official_count} "
+                f"of the official reference ({official_coverage:.1%})"
+            )
+
+    discovery = {
+        "primaryCount": len(primary),
+        "componentCounts": component_counts,
+        "unionCount": current_size,
+        "previousUniverseSize": previous_size,
+        "officialReferenceCount": official_count,
+        "officialCoveragePct": round(official_coverage * 100, 2) if official_coverage is not None else None,
+        "warnings": warnings,
+    }
+    return found, discovery
 
 
 def parse_yahoo_response(response, item):
@@ -184,7 +273,10 @@ def fetch_batch(batch):
 
 def main():
     generated = datetime.now(timezone.utc).isoformat()
-    universe = fetch_ftse_all_share_universe()
+    previous = load_previous_dataset()
+    previous_size = int(previous.get("universeSize") or 0) or None
+    official_count = fetch_official_reference_count()
+    universe, discovery = fetch_ftse_all_share_universe(previous_size, official_count)
     stocks, errors = [], []
     for pos in range(0, len(universe), BATCH_SIZE):
         batch = universe[pos:pos + BATCH_SIZE]
@@ -206,11 +298,39 @@ def main():
             f"need at least {minimum_analysed}. Refusing to publish a partial scan."
         )
     top = stocks[:TOP_N]
-    for i, row in enumerate(top, 1): row["rank"] = i
-    payload = {"generatedAt": generated, "universe": "FTSE All-Share", "universeSource": FTSE_ALL_SHARE_URL, "universeCrossCheckSources": FTSE_COMPONENT_URLS, "officialReferenceCount": OFFICIAL_EXPECTED_CONSTITUENTS, "universeSize": len(universe), "analysedCount": len(stocks), "displayCount": len(top), "ranking": "Radar score descending", "stocks": top, "errors": errors[-100:]}
+    for i, row in enumerate(top, 1):
+        row["rank"] = i
+    quote_coverage = len(stocks) / len(universe) if universe else 0
+    warnings = list(discovery.get("warnings") or [])
+    quality = {
+        "status": "warning" if warnings else "ok",
+        "quoteCoveragePct": round(quote_coverage * 100, 2),
+        "warnings": warnings,
+    }
+    payload = {
+        "generatedAt": generated,
+        "universe": "FTSE All-Share",
+        "universeSource": FTSE_ALL_SHARE_URL,
+        "universeCrossCheckSources": FTSE_COMPONENT_URLS,
+        "officialReferenceSource": OFFICIAL_INDEX_URL,
+        "officialReferenceCount": official_count,
+        "universeSize": len(universe),
+        "analysedCount": len(stocks),
+        "displayCount": len(top),
+        "ranking": "Radar score descending",
+        "universeDiscovery": discovery,
+        "quality": quality,
+        "stocks": top,
+        "errors": errors[-100:],
+    }
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    with open(OUT, "w", encoding="utf-8") as f: json.dump(payload, f, indent=2, ensure_ascii=False)
-    print(f"analysed {len(stocks)} of {len(universe)} FTSE All-Share constituents; published top {len(top)}; {len(errors)} errors")
+    with open(OUT, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, ensure_ascii=False)
+    print(
+        f"analysed {len(stocks)} of {len(universe)} FTSE All-Share constituents "
+        f"({quote_coverage:.1%}); published top {len(top)}; {len(errors)} errors; "
+        f"quality={quality['status']}"
+    )
 
 
 if __name__ == "__main__": main()

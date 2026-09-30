@@ -12,21 +12,46 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: market-data-refresh
+  cancel-in-progress: false
+
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: '3.12'
 
-      - name: Fetch public market and filing data
+      - name: Validate generator syntax
+        run: python -m py_compile scripts/fetch_market_data.py
+
+      - name: Fetch public market data
         run: python scripts/fetch_market_data.py
+
+      - name: Validate generated dataset
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          p = json.loads(Path("data/market.json").read_text(encoding="utf-8"))
+          assert p.get("generatedAt"), "generatedAt missing"
+          assert p.get("universeSize", 0) >= 450, "universe unexpectedly small"
+          assert p.get("analysedCount", 0) >= int(p["universeSize"] * 0.97), "quote coverage too low"
+          assert len(p.get("stocks") or []) == 30, "top-30 output missing"
+          assert p.get("quality", {}).get("status") in {"ok", "warning"}, "quality status missing"
+          print(
+              f"validated: {p['analysedCount']}/{p['universeSize']} analysed; "
+              f"quality={p['quality']['status']}"
+          )
+          PY
 
       - name: Commit refreshed dataset
         run: |
@@ -37,5 +62,6 @@ jobs:
             echo "No data changes"
           else
             git commit -m "Refresh market dataset"
+            git pull --rebase origin main
             git push
           fi

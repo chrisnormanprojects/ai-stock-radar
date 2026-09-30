@@ -1,6 +1,6 @@
 # AI Stock Radar
 
-A mobile-first stock research app for momentum, unusual volume, news catalysts, watchlists and paper trading.
+A mobile-first UK stock research app for momentum, unusual volume, technical signals, watchlists and paper trading.
 
 ## Important
 This app is a research tool, not financial advice and not an automated trading system.
@@ -67,15 +67,22 @@ It will then launch much more like a normal iPhone app.
 
 ## Live stock data
 
-The app can use an Alpha Vantage API key.
+The scheduled GitHub Action builds `data/market.json` on weekdays every two hours.
 
-Open:
+Current data flow:
 
-**Settings → Alpha Vantage API key**
+- **London South East (lse.co.uk)** — FTSE All-Share constituent discovery, cross-checked against FTSE 100, FTSE 250 and FTSE SmallCap pages.
+- **Yahoo Finance** — daily prices, volume and one-year history.
+- **London Stock Exchange** — official FTSE All-Share constituent-count reference used as a quality diagnostic.
+- **Companies House** — manual company verification link only; it is not a live ranking feed.
 
-Paste your key and save it.
+The generator calculates daily change, 5-day momentum, relative volume, RSI-14, 20-day moving-average position, 20-day volatility and distance from the recent high, then ranks the top 30 with the Radar Score.
 
-The key is stored in that browser's local storage.
+There is currently **no Alpha Vantage feed and no live news feed** in the production scanner.
+
+### Data-quality safeguards
+
+A refresh is refused if the discovered universe is implausibly small/large, changes sharply from the last known-good dataset, or Yahoo quote coverage falls below 97%. The official LSE constituent count is deliberately treated as a diagnostic rather than a fixed publish threshold because it changes at index reviews.
 
 ### Security
 Do **not** paste an OpenAI API key directly into `index.html`, JavaScript, GitHub, or any other public client-side file.
@@ -84,13 +91,13 @@ If ChatGPT/OpenAI analysis is added later, it should go through a secure server-
 
 ## Current features
 
-- Stock radar scoring
-- Top opportunities list
-- Early movers
-- News catalyst view
+- FTSE All-Share radar scoring
+- Top 30 ranked results
+- Fast movers
+- 30D / 90D / 6M / 12M price charts
+- RSI, relative volume, moving-average and volatility analytics
 - Watchlist
 - Paper trading
-- US/UK filtering
 - Mobile-first/iPhone interface
 - Installable PWA
 - Offline app shell
@@ -99,13 +106,13 @@ If ChatGPT/OpenAI analysis is added later, it should go through a secure server-
 
 A production-quality v2 should add:
 
-- proper UK market discovery
-- charts
-- RSI / MACD / moving averages
+- add an independent second constituent-list provider to close any gap between the public discovery source and the official FTSE reference
+- MACD and additional indicators
 - unusual-volume alerts
 - signal history
 - automated outcome tracking after 1 hour / 1 day / 5 days / 20 days
 - backtesting
+- a secure news/catalyst feed
 - a secure OpenAI analysis endpoint
 - push notifications for high-scoring signals
 
