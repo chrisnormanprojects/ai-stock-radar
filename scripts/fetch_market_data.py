@@ -4,7 +4,8 @@ from datetime import datetime, timezone
 from urllib.parse import quote, unquote
 from urllib.request import Request, urlopen
 
-OUT = os.path.join(os.path.dirname(__file__), "..", "data", "market.json")
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+OUT = os.path.join(ROOT, "data", "market.json")
 UA = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 AIStockRadar/3.2"
 FTSE_ALL_SHARE_URL = "https://www.lse.co.uk/indices/ftse-all-share/constituents.html"
 FTSE_COMPONENT_URLS = [
@@ -13,6 +14,10 @@ FTSE_COMPONENT_URLS = [
     "https://www.lse.co.uk/indices/ftse-small-cap/constituents.html",
 ]
 OFFICIAL_INDEX_URL = "https://www.londonstockexchange.com/indices/ftse-all-share"
+# Last published reference visible on the official LSE page when this guard was
+# updated. It is diagnostic only and is never used as an exact publish target.
+OFFICIAL_REFERENCE_FALLBACK = 534
+OFFICIAL_REFERENCE_AS_OF = "2026-07-31"
 TOP_N = 30
 # Yahoo's spark endpoint currently rejects requests containing more than 20
 # symbols. Larger batches silently force the refresh into individual retries.
@@ -51,7 +56,8 @@ def load_previous_dataset():
         with open(OUT, "r", encoding="utf-8") as f:
             data = json.load(f)
         return data if isinstance(data, dict) else {}
-    except Exception:
+    except Exception as e:
+        print(f"warning: previous dataset unavailable at {OUT}: {e}")
         return {}
 
 
@@ -68,10 +74,14 @@ def fetch_official_reference_count():
         for pattern in patterns:
             m = re.search(pattern, flat, re.I | re.S)
             if m:
-                return int(m.group(1))
+                return int(m.group(1)), None, "live"
     except Exception as e:
-        print(f"warning: official constituent reference unavailable: {e}")
-    return None
+        print(f"warning: live official constituent reference unavailable: {e}")
+    print(
+        f"using diagnostic official reference fallback: "
+        f"{OFFICIAL_REFERENCE_FALLBACK} as of {OFFICIAL_REFERENCE_AS_OF}"
+    )
+    return OFFICIAL_REFERENCE_FALLBACK, OFFICIAL_REFERENCE_AS_OF, "fallback"
 
 
 def clamp(n, a, b):
@@ -275,7 +285,7 @@ def main():
     generated = datetime.now(timezone.utc).isoformat()
     previous = load_previous_dataset()
     previous_size = int(previous.get("universeSize") or 0) or None
-    official_count = fetch_official_reference_count()
+    official_count, official_as_of, official_mode = fetch_official_reference_count()
     universe, discovery = fetch_ftse_all_share_universe(previous_size, official_count)
     stocks, errors = [], []
     for pos in range(0, len(universe), BATCH_SIZE):
@@ -314,6 +324,8 @@ def main():
         "universeCrossCheckSources": FTSE_COMPONENT_URLS,
         "officialReferenceSource": OFFICIAL_INDEX_URL,
         "officialReferenceCount": official_count,
+        "officialReferenceAsOf": official_as_of,
+        "officialReferenceMode": official_mode,
         "universeSize": len(universe),
         "analysedCount": len(stocks),
         "displayCount": len(top),

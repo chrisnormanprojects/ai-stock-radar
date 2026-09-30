@@ -73,7 +73,7 @@ Current data flow:
 
 - **London South East (lse.co.uk)** — FTSE All-Share constituent discovery, cross-checked against FTSE 100, FTSE 250 and FTSE SmallCap pages.
 - **Yahoo Finance** — daily prices, volume and one-year history.
-- **London Stock Exchange** — official FTSE All-Share constituent-count reference used as a quality diagnostic.
+- **London Stock Exchange** — official FTSE All-Share constituent-count reference used as a quality diagnostic. If the runner cannot read the dynamic LSE page, the generator uses the last published reference (534 as at 31 July 2026) as a warning-only comparison, never as an exact publish threshold.
 - **Companies House** — manual company verification link only; it is not a live ranking feed.
 
 The generator calculates daily change, 5-day momentum, relative volume, RSI-14, 20-day moving-average position, 20-day volatility and distance from the recent high, then ranks the top 30 with the Radar Score.
