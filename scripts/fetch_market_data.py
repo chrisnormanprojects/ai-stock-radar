@@ -286,7 +286,7 @@ def main():
     previous = load_previous_dataset()
     previous_size = int(previous.get("universeSize") or 0) or None
     official_count, official_as_of, official_mode = fetch_official_reference_count()
-    universe, discovery = fetch_ftse_all_share_universe(previous_size, official_count)
+    universe, discovery = fetch_ftse_all_share_universe(previous, official_count)
     stocks, errors = [], []
     for pos in range(0, len(universe), BATCH_SIZE):
         batch = universe[pos:pos + BATCH_SIZE]
